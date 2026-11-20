@@ -443,21 +443,19 @@ dialog.activation-modal #activation-title + p{margin:0 auto 24px;max-width:275px
   background:#81e49b;color:#143822;font-size:12px;font-weight:800;
 }
 
-.template-comparison > :is(img:first-child,video:first-child){
-  filter:saturate(1.35) contrast(1.13) sepia(.14);
-}
 .template-comparison > .comparison-original{
   position:absolute;inset:0;width:100%;height:100%;
   display:block;object-fit:cover;pointer-events:none;
   clip-path:inset(0 0 0 100%);
 }
+.comparison-original > img{display:block;width:100%;height:100%;object-fit:cover}
 .template-comparison.comparison-in-view > .comparison-original{
-  animation:template-reveal-original 4.8s ease-in-out;
+  animation:template-reveal-original 4.6s ease-in-out infinite;
 }
 .template-comparison.comparison-show-original > .comparison-original{clip-path:inset(0)}
 @keyframes template-reveal-original{
-  0%,22%,87%,100%{clip-path:inset(0 0 0 100%)}
-  44%,65%{clip-path:inset(0)}
+  0%,18%,100%{clip-path:inset(0 0 0 100%)}
+  43%,68%{clip-path:inset(0)}
 }
 .template-comparison > .media-kind{z-index:1}
 .detail-poster{overflow:hidden}
@@ -470,6 +468,27 @@ dialog.activation-modal #activation-title + p{margin:0 auto 24px;max-width:275px
 @media(prefers-reduced-motion:reduce){
   .template-comparison.comparison-in-view > .comparison-original{animation:none}
 }
+
+.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)){grid-column:1/-1}
+.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .visual{aspect-ratio:16/9}
+.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .visual > :is(img,video){
+  object-position:50% 34%;
+}
+.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .comparison-original img{
+  object-position:50% 34%;
+}
+.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .comparison-original[data-people="2"]{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;
+}
+.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .comparison-original[data-people="2"] img{display:none}
+.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .comparison-original[data-people="2"]::before,
+.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .comparison-original[data-people="2"]::after{
+  content:"";background:var(--comparison-before) center top / auto 200% no-repeat;
+}
+.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .comparison-original[data-people="2"]::after{
+  background-position:center bottom;
+}
+.trending-grid .card:nth-child(1) .caption{font-size:15px;padding-inline:14px}
 </style></head><body><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><clipPath id="entry-cutout" clipPathUnits="objectBoundingBox"><path d="M.32 0H1V1H0V.43Q0 .28 .12 .28H.14Q.24 .28 .24 .15Q.24 0 .32 0Z"/></clipPath></defs></svg><main><header><button class="brand-home" onclick="browse()" aria-label="GlowUp home"><svg viewBox="0 0 42 42" fill="none" aria-hidden="true"><path d="M29 12a13 13 0 1 0 4 16H22" stroke="#C8B5FF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="m32 1 2.2 6.8L41 10l-6.8 2.2L32 19l-2.2-6.8L23 10l6.8-2.2z" fill="#F3E9FF"/></svg><b>GlowUp</b></button><div class="header-actions"><button id="balance">✧ Get Pro</button><button class="creations-entry signin-entry" onclick="startAccountLogin()" aria-label="Sign in" title="Sign in"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2" stroke-linecap="round"/></svg><span class="signin-label">Sign in</span></button></div></header><div id="app"></div></main><div id="account-shade" hidden onclick="closeAccount()"></div><aside id="account-panel" hidden aria-label="Account menu"></aside><nav id="primary-tabs" aria-label="Main navigation" hidden><button data-page="home" onclick="browse()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3zM9 20v-7h6v7"/></svg><span>Home</span></button><button data-page="works" onclick="openWorksTab()"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 5V3h10v2M3 16l5-5 4 4 3-3 6 6"/></svg><span>My creations</span></button></nav><dialog id="template-detail" aria-labelledby="template-detail-title"></dialog><dialog id="modal"></dialog><details><summary>评审模式 · 原型说明与场景切换</summary><p>照片为风格参考，不代表真实生成结果。支付、登录与任务均为模拟。视频仅为动态照片预览。刷新会清空状态。</p><label>任务结果 <select id="outcome"><option value="ok">成功</option><option value="network">网络未提交 · 退积分</option><option value="failed">已接收后失败 · 不退积分</option></select></label><p><button onclick="state.member=true;state.credits=0;update()">会员 / 0 积分</button><button onclick="state.member=true;state.credits=100;update()">会员 / 100 积分</button><button onclick="location.reload()">重置</button></p></details><script>
 const templates=[{name:'Golden hour kiss',cat:'Couples',people:2,type:'video',cost:30,color:'#c98d83'},{name:'Editorial portrait',cat:'Portraits',people:1,type:'image',cost:10,color:'#8193ab'},{name:'Rainy night kiss',cat:'Couples',people:2,type:'video',cost:30,color:'#656a9b'},{name:'Summer postcard',cat:'Portraits',people:1,type:'image',cost:10,color:'#95b7aa'},{name:'City motion',cat:'Motion',people:1,type:'video',cost:20,color:'#9e829b'},{name:'Wedding moment',cat:'Couples',people:2,type:'image',cost:15,color:'#b0ac9c'}];
 const state={member:false,credits:0,jobs:[]};let current=0,files=[],busy=false,filter='All';const app=document.getElementById('app'),modal=document.getElementById('modal');
@@ -488,7 +507,16 @@ function chooseStudioCategory(cat){const bar=document.querySelector('.studio-cat
 templates.forEach((t,i)=>t.badge=i%6===0?'Hot':i%6===1?'New':null);
 function templateBadge(t){return t.badge?`<span class="template-badge ${t.badge.toLowerCase()}">${t.badge}</span>`:''}
 const icons={spark:'✧',back:'‹',play:'▷'};
-function photo(t){return 'assets/'+photos[t.photoIndex??(Math.max(0,templates.indexOf(t))%photos.length)]+'.jpg'}
+function comparisonPair(t){
+  const index=t.photoIndex??Math.max(0,templates.indexOf(t));
+  if(t.people===2){
+    if(t.type==='image'||t.name.includes('Wedding'))return 'wedding';
+    return index%2===0&&index!==2?'golden-kiss':'rainy-kiss';
+  }
+  if(t.type==='video')return 'motion';
+  return index%2===0?'summer':(t.name==='Summer postcard'?'summer':'editorial');
+}
+function photo(t){return 'assets/compare-'+comparisonPair(t)+'-after.jpg'}
 function previewMedia(t){
   const cover=photo(t);
   return t.type==='video'
@@ -496,7 +524,8 @@ function previewMedia(t){
     :`<img src="${cover}" alt="${t.name} photographic reference" loading="lazy">`;
 }
 function comparisonOriginal(t){
-  return `<img class="comparison-original" src="${photo(t)}" alt="" aria-hidden="true" loading="lazy">`;
+  const before='assets/compare-'+comparisonPair(t)+'-before.jpg';
+  return `<span class="comparison-original" data-people="${t.people}" style="--comparison-before:url('${before}')" aria-hidden="true"><img src="${before}" alt="" loading="lazy"></span>`;
 }
 function art(t,compare=false){
   return `<div class="visual ${t.type==='video'?'is-video':''} ${compare?'template-comparison':''}">${previewMedia(t)}${compare?comparisonOriginal(t):''}${t.type==='video'?'<span class="media-kind">▷ Video</span>':''}</div>`;
@@ -516,7 +545,7 @@ function openWorksTab(){closeAccount();if(!accountSignedIn){window.afterWorksSig
 
 let homeTabScroll=0;
 function chooseHomeCategory(cat){const bar=document.querySelector('#app > .filters');homeTabScroll=bar?bar.scrollLeft:0;const y=window.scrollY;filter=cat;browse();const next=document.querySelector('#app > .filters');if(next){next.scrollLeft=homeTabScroll;const active=next.querySelector('.active');if(active){const left=active.offsetLeft-next.offsetLeft,right=left+active.offsetWidth;if(left<next.scrollLeft)next.scrollLeft=left;else if(right>next.scrollLeft+next.clientWidth)next.scrollLeft=right-next.clientWidth}}window.scrollTo(0,y)}
-function browse(){document.querySelector('main').scrollTop=0;returnView=null;activeNav('browse');app.innerHTML=`<div class="quick-tools sculpted-tools"><button class="sculpted-entry sculpted-video" onclick="openStudio('video')"><span class="solid-card"></span><span class="entry-bubbles" aria-hidden="true"><i></i><i></i><i></i></span><span class="object-video" aria-hidden="true"><span class="clapper-top"><i></i><i></i><i></i></span><span class="clapper-body"><span>▶</span></span></span><span class="sculpted-title">AI Video <span>›</span></span><span class="sculpted-subtitle">Bring photos to life</span><span class="entry-social"><span class="entry-avatars" aria-hidden="true"><img src="assets/${photos[1]}.jpg" alt=""><img src="assets/${photos[3]}.jpg" alt=""><img src="assets/${photos[7]}.jpg" alt=""></span><span>500+ users exploring</span></span></button><button class="sculpted-entry sculpted-image" onclick="openStudio('image')"><span class="solid-card"></span><span class="entry-bubbles" aria-hidden="true"><i></i><i></i><i></i></span><span class="object-image" aria-hidden="true"><span class="photo-back"></span><span class="photo-front"><svg viewBox="0 0 80 68"><rect width="80" height="68" rx="7" fill="#b7d9bc"/><circle cx="57" cy="19" r="9" fill="#faf3c5"/><path d="m0 57 24-32 22 26 13-17 21 30v4H0" fill="#6caa87"/><path d="m0 57 24-32 10 12-12-3z" fill="#e5f2d9"/></svg></span></span><span class="sculpted-title">AI Image <span>›</span></span><span class="sculpted-subtitle">Find your next look</span><span class="entry-social"><span class="entry-avatars" aria-hidden="true"><img src="assets/${photos[1]}.jpg" alt=""><img src="assets/${photos[3]}.jpg" alt=""><img src="assets/${photos[7]}.jpg" alt=""></span><span>500+ users exploring</span></span></button></div><div class="filters">${['All','Portraits','Couples','Motion',...addedCategories].map(c=>`<button class="${filter===c?'active':''}" onclick="chooseHomeCategory('${c}')" title="${c}">${c==='All'?'Trending':tabLabel(c)}</button>`).join('')}</div><div class="grid">${templates.map((t,i)=>(filter==='All'||t.cat===filter)&&(mediaFilter==='all'||t.type===mediaFilter)?`<button class="card card-${i%3}" onclick="openTemplate(${i},this)">${art(t,true)}<div class="caption"><span>${t.name}</span></div>${templateBadge(t)}</button>`:'').join('')}</div>`;update();setupTemplatePreviews();window.scrollTo(0,0)}
+function browse(){document.querySelector('main').scrollTop=0;returnView=null;activeNav('browse');app.innerHTML=`<div class="quick-tools sculpted-tools"><button class="sculpted-entry sculpted-video" onclick="openStudio('video')"><span class="solid-card"></span><span class="entry-bubbles" aria-hidden="true"><i></i><i></i><i></i></span><span class="object-video" aria-hidden="true"><span class="clapper-top"><i></i><i></i><i></i></span><span class="clapper-body"><span>▶</span></span></span><span class="sculpted-title">AI Video <span>›</span></span><span class="sculpted-subtitle">Bring photos to life</span><span class="entry-social"><span class="entry-avatars" aria-hidden="true"><img src="assets/${photos[1]}.jpg" alt=""><img src="assets/${photos[3]}.jpg" alt=""><img src="assets/${photos[7]}.jpg" alt=""></span><span>500+ users exploring</span></span></button><button class="sculpted-entry sculpted-image" onclick="openStudio('image')"><span class="solid-card"></span><span class="entry-bubbles" aria-hidden="true"><i></i><i></i><i></i></span><span class="object-image" aria-hidden="true"><span class="photo-back"></span><span class="photo-front"><svg viewBox="0 0 80 68"><rect width="80" height="68" rx="7" fill="#b7d9bc"/><circle cx="57" cy="19" r="9" fill="#faf3c5"/><path d="m0 57 24-32 22 26 13-17 21 30v4H0" fill="#6caa87"/><path d="m0 57 24-32 10 12-12-3z" fill="#e5f2d9"/></svg></span></span><span class="sculpted-title">AI Image <span>›</span></span><span class="sculpted-subtitle">Find your next look</span><span class="entry-social"><span class="entry-avatars" aria-hidden="true"><img src="assets/${photos[1]}.jpg" alt=""><img src="assets/${photos[3]}.jpg" alt=""><img src="assets/${photos[7]}.jpg" alt=""></span><span>500+ users exploring</span></span></button></div><div class="filters">${['All','Portraits','Couples','Motion',...addedCategories].map(c=>`<button class="${filter===c?'active':''}" onclick="chooseHomeCategory('${c}')" title="${c}">${c==='All'?'Trending':tabLabel(c)}</button>`).join('')}</div><div class="grid ${filter==='All'&&mediaFilter==='all'?'trending-grid':''}">${templates.map((t,i)=>(filter==='All'||t.cat===filter)&&(mediaFilter==='all'||t.type===mediaFilter)?`<button class="card card-${i%3}" onclick="openTemplate(${i},this)">${art(t,true)}<div class="caption"><span>${t.name}</span></div>${templateBadge(t)}</button>`:'').join('')}</div>`;update();setupTemplatePreviews();window.scrollTo(0,0)}
 let studioType=null,studioCategory='All';
 function openStudio(type){document.querySelector('main').scrollTop=0;if(busy)return;studioType=type;studioCategory='All';studioTabScroll=0;renderStudio();window.scrollTo(0,0)}
 function renderStudio(){app.innerHTML=`<section class="studio studio-browser"><div class="studio-top"><button class="back" onclick="studioType=null;browse()" aria-label="Back">‹</button><h2>AI ${studioType==='video'?'Video':'Image'}</h2><span></span></div><div class="studio-panel"><div class="studio-template-toolbar"><div class="filters studio-categories" role="tablist" aria-label="Template categories">${['All',...new Set(templates.filter(item=>item.type===studioType).map(item=>item.cat))].map(cat=>`<button role="tab" aria-selected="${cat===studioCategory}" class="${cat===studioCategory?'active':''}" title="${cat}" onclick="chooseStudioCategory('${cat}')">${tabLabel(cat)}</button>`).join('')}</div></div><div class="studio-templates">${templates.map((item,i)=>item.type===studioType&&(studioCategory==='All'||item.cat===studioCategory)?`<button class="studio-template" onclick="openTemplate(${i},this)"><div class="studio-template-photo template-comparison">${previewMedia(item)}${comparisonOriginal(item)}${templateBadge(item)}<span class="studio-card-title">${item.name}</span></div></button>`:'').join('')}</div></div></section>`;update();setupTemplatePreviews();const tabBar=document.querySelector('.studio-categories');if(tabBar)tabBar.scrollLeft=studioTabScroll}
@@ -530,7 +559,7 @@ function openTemplate(index,source){
   detailOrigin=source?.querySelector('.visual,.studio-template-photo,img')||null;
   templateDetail.innerHTML=`
     <button class="detail-close" type="button" aria-label="Close template" autofocus onclick="closeTemplate()">×</button>
-    <button class="detail-compare" type="button" aria-pressed="false" onclick="toggleTemplateComparison(this)">Show original</button>
+    <button class="detail-compare" type="button" onclick="toggleTemplateComparison(this)">Before</button>
     <div class="detail-content">
       <div class="detail-poster template-comparison comparison-in-view">
         <img src="${cover}" alt="">
@@ -550,11 +579,9 @@ function openTemplate(index,source){
 
 function toggleTemplateComparison(button){
   const poster=templateDetail.querySelector('.detail-poster');
-  const showOriginal=button.getAttribute('aria-pressed')==='false';
-  poster.classList.remove('comparison-in-view');
-  poster.classList.toggle('comparison-show-original',showOriginal);
-  button.setAttribute('aria-pressed',String(showOriginal));
-  button.textContent=showOriginal?'Show effect':'Show original';
+  const showOriginal=poster.classList.toggle('comparison-show-original');
+  poster.classList.toggle('comparison-in-view',!showOriginal);
+  button.textContent=showOriginal?'After':'Before';
 }
 
 function animateTemplate(closing){
