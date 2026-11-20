@@ -470,23 +470,20 @@ dialog.activation-modal #activation-title + p{margin:0 auto 24px;max-width:275px
 }
 
 .trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)){grid-column:1/-1}
-.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .visual{aspect-ratio:16/9}
-.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .visual > :is(img,video){
-  object-position:50% 34%;
+/* Keep the complete portrait visible inside featured landscape covers. */
+.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .visual{
+  aspect-ratio:16/9;isolation:isolate;
 }
-.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .comparison-original img{
-  object-position:50% 34%;
+.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .comparison-original{
+  isolation:isolate;
 }
-.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .comparison-original[data-people="2"]{
-  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;
+.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) :is(.visual,.comparison-original)::before{
+  content:"";position:absolute;inset:-16px;z-index:-1;
+  background:linear-gradient(#15101e48,#15101e48),var(--comparison-background) center / cover;
+  filter:blur(18px);pointer-events:none;
 }
-.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .comparison-original[data-people="2"] img{display:none}
-.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .comparison-original[data-people="2"]::before,
-.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .comparison-original[data-people="2"]::after{
-  content:"";background:var(--comparison-before) center top / auto 200% no-repeat;
-}
-.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) .comparison-original[data-people="2"]::after{
-  background-position:center bottom;
+.trending-grid .card:is(:nth-child(1),:nth-child(4),:nth-child(5)) :is(.visual,.comparison-original) > :is(img,video){
+  object-fit:contain;object-position:center;background:transparent;transform:none;
 }
 .trending-grid .card:nth-child(1) .caption{font-size:15px;padding-inline:14px}
 </style></head><body><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><clipPath id="entry-cutout" clipPathUnits="objectBoundingBox"><path d="M.32 0H1V1H0V.43Q0 .28 .12 .28H.14Q.24 .28 .24 .15Q.24 0 .32 0Z"/></clipPath></defs></svg><main><header><button class="brand-home" onclick="browse()" aria-label="GlowUp home"><svg viewBox="0 0 42 42" fill="none" aria-hidden="true"><path d="M29 12a13 13 0 1 0 4 16H22" stroke="#C8B5FF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="m32 1 2.2 6.8L41 10l-6.8 2.2L32 19l-2.2-6.8L23 10l6.8-2.2z" fill="#F3E9FF"/></svg><b>GlowUp</b></button><div class="header-actions"><button id="balance">✧ Get Pro</button><button class="creations-entry signin-entry" onclick="startAccountLogin()" aria-label="Sign in" title="Sign in"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2" stroke-linecap="round"/></svg><span class="signin-label">Sign in</span></button></div></header><div id="app"></div></main><div id="account-shade" hidden onclick="closeAccount()"></div><aside id="account-panel" hidden aria-label="Account menu"></aside><nav id="primary-tabs" aria-label="Main navigation" hidden><button data-page="home" onclick="browse()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3zM9 20v-7h6v7"/></svg><span>Home</span></button><button data-page="works" onclick="openWorksTab()"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 5V3h10v2M3 16l5-5 4 4 3-3 6 6"/></svg><span>My creations</span></button></nav><dialog id="template-detail" aria-labelledby="template-detail-title"></dialog><dialog id="modal"></dialog><details><summary>评审模式 · 原型说明与场景切换</summary><p>照片为风格参考，不代表真实生成结果。支付、登录与任务均为模拟。视频仅为动态照片预览。刷新会清空状态。</p><label>任务结果 <select id="outcome"><option value="ok">成功</option><option value="network">网络未提交 · 退积分</option><option value="failed">已接收后失败 · 不退积分</option></select></label><p><button onclick="state.member=true;state.credits=0;update()">会员 / 0 积分</button><button onclick="state.member=true;state.credits=100;update()">会员 / 100 积分</button><button onclick="location.reload()">重置</button></p></details><script>
@@ -525,10 +522,10 @@ function previewMedia(t){
 }
 function comparisonOriginal(t){
   const before='assets/compare-'+comparisonPair(t)+'-before.jpg';
-  return `<span class="comparison-original" data-people="${t.people}" style="--comparison-before:url('${before}')" aria-hidden="true"><img src="${before}" alt="" loading="lazy"></span>`;
+  return `<span class="comparison-original" style="--comparison-background:url('${before}')" aria-hidden="true"><img src="${before}" alt="" loading="lazy"></span>`;
 }
 function art(t,compare=false){
-  return `<div class="visual ${t.type==='video'?'is-video':''} ${compare?'template-comparison':''}">${previewMedia(t)}${compare?comparisonOriginal(t):''}${t.type==='video'?'<span class="media-kind">▷ Video</span>':''}</div>`;
+  return `<div class="visual ${t.type==='video'?'is-video':''} ${compare?'template-comparison':''}"${compare?` style="--comparison-background:url('${photo(t)}')"`:''}>${previewMedia(t)}${compare?comparisonOriginal(t):''}${t.type==='video'?'<span class="media-kind">▷ Video</span>':''}</div>`;
 }
 let creditHistory=[],historyFilter='All';
 function changeCredits(amount,label,kind){state.credits+=amount;creditHistory.unshift({amount,label,kind,balance:state.credits,time:new Date().toLocaleString('en-GB',{timeZone:'Asia/Shanghai',hour12:false})})}
