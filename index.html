@@ -366,6 +366,12 @@ dialog.activation-modal #activation-title + p{margin:0 auto 24px;max-width:275px
   height:100dvh;max-height:none;padding:0;border:0;border-radius:0;
   isolation:isolate;background:#181322;overflow:auto;overscroll-behavior:contain;
 }
+@media(min-width:600px){
+  #template-detail{
+    inset:24px 0 auto;margin:0 auto;
+    width:var(--phone-w);height:var(--phone-h);border-radius:25px;scrollbar-width:none;
+  }
+}
 #template-detail::backdrop{background:#100c18aa}
 .detail-close{
   position:absolute;z-index:2;left:16px;top:calc(14px + env(safe-area-inset-top,0px));
