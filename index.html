@@ -612,7 +612,8 @@ const sampleCreditHistory=[
   {label:'Credits expired',amount:-5,time:'22/11/2026, 18:15'},
   {label:'Image generation',detail:'Editorial portrait',amount:-10,time:'22/11/2026, 16:40'},
   {label:'Video generation',detail:'Golden hour kiss',amount:-30,time:'22/11/2026, 14:20'},
-  {label:'Demo credits',amount:45,time:'22/11/2026, 14:00'}
+  {label:'Credit top-up',amount:100,time:'22/11/2026, 14:00'},
+  {label:'Membership credits',amount:60,time:'22/11/2026, 13:45'}
 ];
 
 function historyPage(filter='All'){historyFilter=filter;const rows=[...creditHistory,...sampleCreditHistory].filter(r=>filter==='All'||(filter==='Received'?r.amount>0:r.amount<0));app.innerHTML=`<div class="page-top history-top"><button class="back" onclick="openRecharge()" aria-label="Back to buy credits">‹</button><span>Credit history</span><span></span></div><div class="history-balance"><small>Current balance</small><h2>✧ ${state.credits}</h2></div><div class="filters">${['All','Received','Used'].map(f=>`<button class="${f===filter?'active':''}" onclick="historyPage('${f}')">${f}</button>`).join('')}</div><div class="history-list">${rows.length?rows.map(r=>`<div class="history-row"><span class="history-symbol">${r.amount>0?'＋':'−'}</span><div class="history-description"><b>${r.label}</b>${r.detail?`<small>${r.detail}</small>`:''}<small>${r.time}</small></div><strong class="${r.amount>0?'positive':''}">${r.amount>0?'+':''}${r.amount}</strong></div>`).join(''):`<p class="history-empty">${filter==='Used'?'No credits used yet.':'No transactions yet.'}</p>`}</div>`;update();window.scrollTo(0,0)}
