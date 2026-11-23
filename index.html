@@ -113,9 +113,34 @@ main:has(.studio-cta),main:has(.create-footer){padding-bottom:calc(130px + env(s
 @media(max-width:390px){.sculpted-title{font-size:18px;top:70px}.sculpted-subtitle{display:none}.sculpted-action{left:auto;right:12px;bottom:14px;width:26px;height:26px;font-size:20px}.object-video,.object-image{right:12px;transform:rotate(10deg) scale(.85);transform-origin:top right}.sculpted-entry{height:139px}}
 
 .entry-social{position:absolute;left:14px;right:8px;bottom:17px;display:flex;align-items:center;gap:5px;color:#766b83;font-size:8px;line-height:1.2;font-weight:400;white-space:nowrap}
-.entry-avatars{display:flex;align-items:center;padding-left:0;flex:none}
-.entry-avatars img{width:17px;height:17px;border-radius:50%;object-fit:cover;border:1.5px solid #eee8f8;margin-left:-5px}.entry-avatars img:first-child{margin-left:0}.sculpted-image .entry-avatars img{border-color:#e6efe2}.sculpted-image .entry-social{color:#6e7b69}
-@media(max-width:390px){.entry-social{left:12px;bottom:14px;font-size:7px;gap:4px}.entry-avatars img{width:14px;height:14px;margin-left:-4px}.sculpted-title{top:65px}}
+.entry-avatars{--avatar-size:17px;--avatar-overlap:5px;display:flex;align-items:center;flex:none}
+.entry-avatar{
+  position:relative;display:block;width:var(--avatar-size);height:var(--avatar-size);
+  overflow:hidden;border:1.5px solid #eee8f8;border-radius:50%;
+  background:#746787;
+}
+.entry-avatar + .entry-avatar{margin-inline-start:calc(-1 * var(--avatar-overlap))}
+.entry-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 35%}
+.entry-avatar img + img{opacity:0}
+.sculpted-image .entry-avatar{border-color:#e6efe2}
+.sculpted-image .entry-social{color:#6e7b69;--avatar-card-delay:.6s}
+.entry-avatar:nth-child(2){--avatar-delay:1.2s}
+.entry-avatar:nth-child(3){--avatar-delay:2.4s}
+@media(prefers-reduced-motion:no-preference){
+  .entry-avatar img + img{
+    animation:entry-avatar-swap 7.2s ease-in-out infinite;
+    animation-delay:calc(var(--avatar-card-delay,0s) + var(--avatar-delay,0s));
+  }
+}
+@keyframes entry-avatar-swap{
+  0%,39%,100%{opacity:0;transform:translateY(2px)}
+  45%,90%{opacity:1;transform:translateY(0)}
+}
+@media(max-width:390px){
+  .entry-social{left:12px;bottom:14px;font-size:7px;gap:4px}
+  .entry-avatars{--avatar-size:14px;--avatar-overlap:4px}
+  .sculpted-title{top:65px}
+}
 
 #app>.filters{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
 #app>.filters button{flex:0 0 auto;white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis}
@@ -629,7 +654,16 @@ function openWorksTab(){closeAccount();if(!accountSignedIn){window.afterWorksSig
 
 let homeTabScroll=0;
 function chooseHomeCategory(cat){const bar=document.querySelector('#app > .filters');homeTabScroll=bar?bar.scrollLeft:0;const y=window.scrollY;filter=cat;browse();const next=document.querySelector('#app > .filters');if(next){next.scrollLeft=homeTabScroll;const active=next.querySelector('.active');if(active){const left=active.offsetLeft-next.offsetLeft,right=left+active.offsetWidth;if(left<next.scrollLeft)next.scrollLeft=left;else if(right>next.scrollLeft+next.clientWidth)next.scrollLeft=right-next.clientWidth}}window.scrollTo(0,y)}
-function browse(){document.querySelector('main').scrollTop=0;returnView=null;activeNav('browse');app.innerHTML=`<div class="quick-tools sculpted-tools"><button class="sculpted-entry sculpted-video" onclick="openStudio('video')"><span class="solid-card"></span><span class="entry-bubbles" aria-hidden="true"><i></i><i></i><i></i></span><span class="object-video" aria-hidden="true"><span class="clapper-top"><i></i><i></i><i></i></span><span class="clapper-body"><span>▶</span></span></span><span class="sculpted-title">AI Video <span>›</span></span><span class="sculpted-subtitle">Bring photos to life</span><span class="entry-social"><span class="entry-avatars" aria-hidden="true"><img src="assets/${photos[1]}.jpg" alt=""><img src="assets/${photos[3]}.jpg" alt=""><img src="assets/${photos[7]}.jpg" alt=""></span><span>500+ users exploring</span></span></button><button class="sculpted-entry sculpted-image" onclick="openStudio('image')"><span class="solid-card"></span><span class="entry-bubbles" aria-hidden="true"><i></i><i></i><i></i></span><span class="object-image" aria-hidden="true"><span class="photo-back"></span><span class="photo-front"><svg viewBox="0 0 80 68"><rect width="80" height="68" rx="7" fill="#b7d9bc"/><circle cx="57" cy="19" r="9" fill="#faf3c5"/><path d="m0 57 24-32 22 26 13-17 21 30v4H0" fill="#6caa87"/><path d="m0 57 24-32 10 12-12-3z" fill="#e5f2d9"/></svg></span></span><span class="sculpted-title">AI Image <span>›</span></span><span class="sculpted-subtitle">Find your next look</span><span class="entry-social"><span class="entry-avatars" aria-hidden="true"><img src="assets/${photos[1]}.jpg" alt=""><img src="assets/${photos[3]}.jpg" alt=""><img src="assets/${photos[7]}.jpg" alt=""></span><span>500+ users exploring</span></span></button></div><div class="filters">${['All','Portraits','Couples','Motion',...addedCategories].map(c=>`<button class="${filter===c?'active':''}" onclick="chooseHomeCategory('${c}')" title="${c}">${c==='All'?'🔥 Trending':tabLabel(c)}</button>`).join('')}</div><div class="grid ${filter==='All'&&mediaFilter==='all'?'trending-grid':''}">${templates.map((t,i)=>(filter==='All'||t.cat===filter)&&(mediaFilter==='all'||t.type===mediaFilter)?`<button class="card card-${i%3}" onclick="openTemplate(${i},this)">${art(t,true)}<div class="caption"><span>${t.name}</span></div>${templateBadge(t)}</button>`:'').join('')}</div>`;update();setupTemplatePreviews();window.scrollTo(0,0)}
+function entryAvatars(reverse=false){
+  const originals=[1,3,7].map(index=>'assets/'+photos[index]+'.jpg');
+  const alternates=['editorial','summer','motion'].map(key=>'assets/compare-'+key+'-before.jpg');
+  const first=reverse?alternates:originals;
+  const next=reverse?originals:alternates;
+  return `<span class="entry-avatars" aria-hidden="true">${first.map((source,index)=>
+    `<span class="entry-avatar"><img src="${source}" alt=""><img src="${next[index]}" alt=""></span>`
+  ).join('')}</span>`;
+}
+function browse(){document.querySelector('main').scrollTop=0;returnView=null;activeNav('browse');app.innerHTML=`<div class="quick-tools sculpted-tools"><button class="sculpted-entry sculpted-video" onclick="openStudio('video')"><span class="solid-card"></span><span class="entry-bubbles" aria-hidden="true"><i></i><i></i><i></i></span><span class="object-video" aria-hidden="true"><span class="clapper-top"><i></i><i></i><i></i></span><span class="clapper-body"><span>▶</span></span></span><span class="sculpted-title">AI Video <span>›</span></span><span class="sculpted-subtitle">Bring photos to life</span><span class="entry-social">${entryAvatars()}<span>500+ users exploring</span></span></button><button class="sculpted-entry sculpted-image" onclick="openStudio('image')"><span class="solid-card"></span><span class="entry-bubbles" aria-hidden="true"><i></i><i></i><i></i></span><span class="object-image" aria-hidden="true"><span class="photo-back"></span><span class="photo-front"><svg viewBox="0 0 80 68"><rect width="80" height="68" rx="7" fill="#b7d9bc"/><circle cx="57" cy="19" r="9" fill="#faf3c5"/><path d="m0 57 24-32 22 26 13-17 21 30v4H0" fill="#6caa87"/><path d="m0 57 24-32 10 12-12-3z" fill="#e5f2d9"/></svg></span></span><span class="sculpted-title">AI Image <span>›</span></span><span class="sculpted-subtitle">Find your next look</span><span class="entry-social">${entryAvatars(true)}<span>500+ users exploring</span></span></button></div><div class="filters">${['All','Portraits','Couples','Motion',...addedCategories].map(c=>`<button class="${filter===c?'active':''}" onclick="chooseHomeCategory('${c}')" title="${c}">${c==='All'?'🔥 Trending':tabLabel(c)}</button>`).join('')}</div><div class="grid ${filter==='All'&&mediaFilter==='all'?'trending-grid':''}">${templates.map((t,i)=>(filter==='All'||t.cat===filter)&&(mediaFilter==='all'||t.type===mediaFilter)?`<button class="card card-${i%3}" onclick="openTemplate(${i},this)">${art(t,true)}<div class="caption"><span>${t.name}</span></div>${templateBadge(t)}</button>`:'').join('')}</div>`;update();setupTemplatePreviews();window.scrollTo(0,0)}
 let studioType=null,studioCategory='All';
 function openStudio(type){document.querySelector('main').scrollTop=0;if(busy)return;studioType=type;studioCategory='All';studioTabScroll=0;renderStudio();window.scrollTo(0,0)}
 function renderStudio(){app.innerHTML=`<section class="studio studio-browser"><div class="studio-top"><button class="back" onclick="studioType=null;browse()" aria-label="Back">‹</button><h2>AI ${studioType==='video'?'Video':'Image'}</h2><span></span></div><div class="studio-panel"><div class="studio-template-toolbar"><div class="filters studio-categories" role="tablist" aria-label="Template categories">${['All',...new Set(templates.filter(item=>item.type===studioType).map(item=>item.cat))].map(cat=>`<button role="tab" aria-selected="${cat===studioCategory}" class="${cat===studioCategory?'active':''}" title="${cat==='All'?'New':cat}" onclick="chooseStudioCategory('${cat}')">${cat==='All'?'New':tabLabel(cat)}</button>`).join('')}</div></div><div class="studio-templates">${templates.map((item,i)=>item.type===studioType&&(studioCategory==='All'||item.cat===studioCategory)?`<button class="studio-template" onclick="openTemplate(${i},this)"><div class="studio-template-photo template-comparison">${previewMedia(item)}${comparisonOriginal(item)}${templateBadge(item)}<span class="studio-card-title">${item.name}</span></div></button>`:'').join('')}</div></div></section>`;update();setupTemplatePreviews();const tabBar=document.querySelector('.studio-categories');if(tabBar)tabBar.scrollLeft=studioTabScroll}
