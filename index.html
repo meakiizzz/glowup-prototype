@@ -750,7 +750,8 @@ function showPlans(resume=true){window.resumeAfterPurchase=resume;if(awaitingLog
   <p>Turn your photos into AI portraits and short videos. Pick a template, add one or two photos, and make the look your own. After the first 7 days, your subscription automatically renews at $19.99 per week until canceled. To request cancellation, open <strong>Contact us</strong> in your account menu and send us an email.</p>
 </div><button class="wide" onclick="paid()">Start for $0.99</button><div class="purchase-legal"><a href="terms.html" target="_blank" rel="noopener">Terms</a><span>·</span><a href="privacy.html" target="_blank" rel="noopener">Privacy</a><span>·</span><a href="payment-agreement.html" target="_blank" rel="noopener">Payment Agreement</a></div></div>`,'paywall immersive-paywall')}
 function upload(input,i){const f=input.files[0];if(!f)return;if(!f.type.startsWith('image/')){document.getElementById('status').textContent='Please choose an image.';return}if(files[i]&&!state.jobs.some(job=>job.originals?.includes(files[i])))URL.revokeObjectURL(files[i]);files[i]=URL.createObjectURL(f);const img=document.getElementById('thumb'+i);img.src=files[i];img.hidden=false;document.getElementById('generate').disabled=!files.every(Boolean)}
-function popup(html,cls=''){modal.removeAttribute('aria-labelledby');modal.className=cls;modal.innerHTML='<button class="modal-close" aria-label="Close" onclick="closeModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>'+html;modal.showModal()}
+const modalCloseButton='<button class="modal-close" aria-label="Close" onclick="closeModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>';
+function popup(html,cls=''){modal.removeAttribute('aria-labelledby');modal.className=cls;modal.innerHTML=modalCloseButton+html;modal.showModal()}
 let awaitingLogin=false;
 function closeModal(){
   if(awaitingLogin){
@@ -761,10 +762,52 @@ function closeModal(){
 }
 function gate(){if(busy||!files.every(Boolean))return;if(!state.member){showPlans(true);return}if(state.credits<templates[current].cost){popup('<div class="modal-icon">✧</div><h2>A few more possibilities.</h2><p>Your membership is active.<br>Add credits to keep creating.</p><div class="plan"><div><b>100 credits</b><small>One-time credit pack</small></div><strong>$4.99</strong></div><button class="wide" onclick="changeCredits(100,&quot;Credit top-up&quot;,&quot;purchase&quot;);closeModal();update();gate()">Add 100 credits</button><p class="terms">Demo price. No payment will be taken.</p>');return}generate()}
 function paid(){accountLoginMode=false;modal.close();awaitingLogin=true;popup('<div class="activation-art" aria-hidden="true"><span class="activation-spark">✦</span><span class="activation-spark">✧</span><div class="activation-medallion"><span class="activation-crown"></span><span class="activation-check">✓</span></div></div><h2 id="activation-title">GlowUp Pro<br>activated!</h2><p>Sign in to link your membership and credits to your account.</p><button class="wide" onclick="emailLogin()">✉ Continue with email</button><p class="terms">Prototype only — no account is created.</p>','activation-modal');modal.setAttribute('aria-labelledby','activation-title');modal.oncancel=event=>{event.preventDefault();closeModal()}}
-function loginNavigation(){return '<button class="login-back" onclick="backToLogin()" aria-label="Back to sign-in options">‹</button>'+'<button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>'}
-function backToLogin(){modal.close();if(awaitingLogin){paid()}else{startAccountLogin()}}
-function emailLogin(){modal.removeAttribute('aria-labelledby');modal.className='';modal.innerHTML=loginNavigation()+'<div class="modal-icon">✉</div><h2>A little hello<br>in your inbox.</h2><p>We’ll send you a sign-in code.</p><label class="email-label">Email address<input id="email" type="email" placeholder="you@example.com" autocomplete="email"></label><p id="email-error" role="status"></p><button class="wide" onclick="verifyEmail()">Continue</button><p class="terms">Demo verification — no email is sent.</p>'}
-function verifyEmail(){const input=document.getElementById('email');if(!input.value||!input.checkValidity()){document.getElementById('email-error').textContent='Enter a valid email address.';return}modal.innerHTML=loginNavigation()+'<div class="modal-icon success">✓</div><h2>You’re all set.</h2><p>'+(accountLoginMode?'Your account is ready.':'Your membership and 60 credits are ready.')+'</p><button class="wide" onclick="login()">Continue</button>'}
+function loginNavigation(backAction=''){
+  const back=backAction?`<button class="login-back" type="button" onclick="${backAction}" aria-label="Back">‹</button>`:'';
+  return back+modalCloseButton.replace('closeModal()','cancelEmailLogin()');
+}
+
+function cancelEmailLogin(){
+  window.afterWorksSignIn=false;
+  modal.oncancel=null;
+  closeModal();
+}
+
+function emailLogin(){
+  modal.className='';
+  modal.setAttribute('aria-labelledby','email-sign-in-title');
+  modal.innerHTML=loginNavigation(awaitingLogin?'paid()':'')+`
+    <div class="modal-icon login-profile-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2" stroke-linecap="round"/></svg></div>
+    <h2 id="email-sign-in-title">Sign in to GlowUp</h2>
+    <p>We’ll send a one-time code to your email.</p>
+    <form novalidate onsubmit="event.preventDefault();verifyEmail()">
+      <label class="email-label">Email address
+        <input id="email" type="email" placeholder="you@example.com" autocomplete="email" required autofocus>
+      </label>
+      <p id="email-error" role="status"></p>
+      <button class="wide" type="submit">Send code</button>
+    </form>
+    <p class="terms">Demo only. No email will be sent.</p>`;
+  modal.oncancel=event=>{event.preventDefault();cancelEmailLogin()};
+  if(!modal.open)modal.showModal();
+  document.getElementById('email').focus();
+}
+
+function verifyEmail(){
+  const input=document.getElementById('email');
+  if(!input.checkValidity()){
+    document.getElementById('email-error').textContent='Enter a valid email address.';
+    input.focus();
+    return;
+  }
+  modal.setAttribute('aria-labelledby','email-sign-in-success');
+  modal.innerHTML=loginNavigation('emailLogin()')+`
+    <div class="modal-icon success" aria-hidden="true">✓</div>
+    <h2 id="email-sign-in-success">You’re all set.</h2>
+    <p>${accountLoginMode?'Your account is ready.':'Your membership and 60 credits are ready.'}</p>
+    <button class="wide" type="button" onclick="login()" autofocus>Continue</button>`;
+  modal.querySelector('[autofocus]').focus();
+}
 function login(){awaitingLogin=false;modal.oncancel=null;accountSignedIn=true;if(accountLoginMode){accountLoginMode=false;if(accountSnapshot){state.member=accountSnapshot.member;state.credits=accountSnapshot.credits;state.jobs=accountSnapshot.jobs;creditHistory=accountSnapshot.history;accountSnapshot=null}closeModal();update();if(window.afterWorksSignIn){window.afterWorksSignIn=false;works()}else update();return}state.member=true;changeCredits(60,'Membership credits','membership');closeModal();update();if(window.afterWorksSignIn){window.afterWorksSignIn=false;works()}else if(window.resumeAfterPurchase)gate();else if(returnView){const previous=returnView;returnView=null;openRecharge();returnView=previous}}
 function generate(){if(busy)return;busy=true;const t=templates[current],result=document.getElementById('outcome').value;changeCredits(-t.cost,t.name,'generation');const job={t,status:'processing',result,originals:files.slice()};state.jobs.unshift(job);update();document.getElementById('generate').disabled=true;document.getElementById('status').textContent='';const top=Math.max(0,document.querySelector('header').getBoundingClientRect().bottom);const overlay=document.createElement('div');overlay.id='generation-overlay';overlay.setAttribute('role','status');overlay.setAttribute('aria-live','polite');overlay.style.top=top+'px';overlay.innerHTML='<div class="generation-message"><div class="glow-loader" aria-hidden="true"><span class="loader-orbit orbit-one"></span><span class="loader-orbit orbit-two"></span><span class="loader-core"><svg viewBox="0 0 42 42" fill="none"><path d="M29 12a13 13 0 1 0 4 16H22" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="m32 2 2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="currentColor"/></svg></span><i class="loader-spark spark-one">✧</i><i class="loader-spark spark-two">✦</i></div><p>Creating your glow</p><span class="loading-subtitle">A little magic is on its way</span><div class="loading-progress"><span></span></div></div>';document.body.appendChild(overlay);document.body.classList.add('is-generating');document.getElementById('app').setAttribute('inert','');document.querySelector('header').setAttribute('inert','');setTimeout(()=>{job.status=result==='ok'?'done':'failed';if(result==='network')changeCredits(t.cost,'Submission refund · '+t.name,'refund');busy=false;overlay.remove();document.body.classList.remove('is-generating');document.getElementById('app').removeAttribute('inert');document.querySelector('header').removeAttribute('inert');update();if(job.status==='done'){view(state.jobs.indexOf(job))}else{document.getElementById('generate').disabled=false;document.getElementById('status').textContent=result==='network'?'Could not submit. Your credits have been returned. Please try again.':'Generation failed. Credits were not returned. You can try again.'}},4200)}
 let accountSignedIn=false,accountLoginMode=false,accountSnapshot=null;
@@ -799,7 +842,13 @@ function signOut(){
   accountSignedIn=false;
   browse();
 }
-function startAccountLogin(){closeAccount();if(awaitingLogin){window.resumeAfterPurchase=false;paid();return}accountLoginMode=true;window.resumeAfterPurchase=false;popup('<div class="modal-icon login-profile-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2" stroke-linecap="round"/></svg></div><h2>Welcome back.</h2><p>Sign in to access your account and creations.</p><button class="wide" onclick="emailLogin()">✉ Continue with email</button><p class="terms">Prototype only — no account is created.</p>')}
+function startAccountLogin(){
+  closeAccount();
+  window.resumeAfterPurchase=false;
+  if(awaitingLogin){paid();return}
+  accountLoginMode=true;
+  emailLogin();
+}
 function works(){document.querySelector('main').scrollTop=0;activeNav('works');update();returnView=null;app.innerHTML=''+(!state.jobs.length?'<div class="empty-gallery"><div class="empty-images"><img src="'+photo(templates[1])+'" alt="Portrait inspiration"><img src="'+photo(templates[3])+'" alt="Portrait inspiration"></div><h2>Your story starts here.</h2><p>Your photos and videos will find<br>a home in this little gallery.</p><button onclick="browse()">Find your first look</button></div>':'<div class="works-grid">'+state.jobs.map((job,index)=>{
   const video=job.t.type==='video';
   const cover=`<img src="${photo(job.t)}" alt="" loading="lazy">`;
