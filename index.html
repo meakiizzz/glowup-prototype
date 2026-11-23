@@ -595,6 +595,35 @@ dialog.activation-modal #activation-title + p{margin:0 auto 24px;max-width:275px
   position:absolute;top:0;right:0;padding:3px 8px;border-radius:0 11px 0 9px;
   background:#6b53a6;color:#fff;font-size:10px;font-weight:750;line-height:1.3;
 }
+
+.generation-gallery{
+  margin-top:24px;padding:9px 15px;border:1px solid #ffffff27;
+  border-radius:20px;background:transparent;color:#ded0f4;font-size:12px;
+}
+.work-loading-overlay{
+  position:absolute;inset:0;display:grid;place-items:center;
+  background:#100b19a6;
+}
+.work-spinner{
+  width:34px;height:34px;border:2px solid #e8d9ff45;border-top-color:#ead6ff;
+  border-radius:50%;animation:glow-orbit-spin .9s linear infinite;
+}
+.work-card.is-processing .work-card-video{z-index:1}
+.work-card.is-failed img{filter:brightness(.52) saturate(.7)}
+.work-card.is-failed .work-card-status{color:#ffc5cd}
+.failed-creation-content{
+  min-height:min(56dvh,390px);display:grid;align-content:center;justify-items:center;
+  padding:28px;text-align:center;
+}
+.failed-creation-icon{
+  display:grid;place-items:center;width:58px;height:58px;border-radius:50%;
+  background:#513040;color:#ffb9c8;font-size:30px;font-weight:650;
+}
+.failed-creation-content h2{margin:20px 0 6px}
+.failed-creation-content p{margin:0;max-width:270px}
+.failed-creation-actions{grid-template-columns:1fr}
+.failed-creation-actions .wide{margin:0}
+@media(prefers-reduced-motion:reduce){.work-spinner{animation:none}}
 </style></head><body><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><clipPath id="entry-cutout" clipPathUnits="objectBoundingBox"><path d="M.32 0H1V1H0V.43Q0 .28 .12 .28H.14Q.24 .28 .24 .15Q.24 0 .32 0Z"/></clipPath></defs></svg><main><header><button class="brand-home" onclick="browse()" aria-label="GlowUp home"><svg viewBox="0 0 42 42" fill="none" aria-hidden="true"><path d="M29 12a13 13 0 1 0 4 16H22" stroke="#C8B5FF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="m32 1 2.2 6.8L41 10l-6.8 2.2L32 19l-2.2-6.8L23 10l6.8-2.2z" fill="#F3E9FF"/></svg><b>GlowUp</b></button><div class="header-actions"><button id="balance">✧ Get Pro</button><button class="creations-entry signin-entry" onclick="startAccountLogin()" aria-label="Sign in" title="Sign in"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2" stroke-linecap="round"/></svg><span class="signin-label">Sign in</span></button></div></header><div id="app"></div></main><div id="account-shade" hidden onclick="closeAccount()"></div><aside id="account-panel" hidden aria-label="Account menu"></aside><nav id="primary-tabs" aria-label="Main navigation" hidden><button data-page="home" onclick="browse()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3zM9 20v-7h6v7"/></svg><span>Home</span></button><button data-page="works" onclick="openWorksTab()"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 5V3h10v2M3 16l5-5 4 4 3-3 6 6"/></svg><span>My creations</span></button></nav><dialog id="template-detail" aria-labelledby="template-detail-title"></dialog><dialog id="modal"></dialog><details><summary>评审模式 · 原型说明与场景切换</summary><p>照片为风格参考，不代表真实生成结果。支付、登录与任务均为模拟。视频仅为动态照片预览。刷新会清空状态。</p><label>任务结果 <select id="outcome"><option value="ok">成功</option><option value="network">网络未提交 · 退积分</option><option value="failed">已接收后失败 · 不退积分</option></select></label><p><button onclick="state.member=true;state.credits=0;update()">会员 / 0 积分</button><button onclick="state.member=true;state.credits=100;update()">会员 / 100 积分</button><button onclick="location.reload()">重置</button></p></details><script>
 const templates=[{name:'Golden hour kiss',cat:'Couples',people:2,type:'video',cost:30,color:'#c98d83'},{name:'Editorial portrait',cat:'Portraits',people:1,type:'image',cost:10,color:'#8193ab'},{name:'Rainy night kiss',cat:'Couples',people:2,type:'video',cost:30,color:'#656a9b'},{name:'Summer postcard',cat:'Portraits',people:1,type:'image',cost:10,color:'#95b7aa'},{name:'City motion',cat:'Motion',people:1,type:'video',cost:20,color:'#9e829b'},{name:'Wedding moment',cat:'Couples',people:2,type:'image',cost:15,color:'#b0ac9c'}];
 const state={member:false,credits:0,jobs:[]};let current=0,files=[],busy=false,filter='All';const app=document.getElementById('app'),modal=document.getElementById('modal');
@@ -638,7 +667,7 @@ function art(t,compare=false){
   return `<div class="visual ${t.type==='video'?'is-video':''} ${compare?'template-comparison':''}"${compare?` style="--comparison-background:url('${photo(t)}')"`:''}>${previewMedia(t)}${compare?comparisonOriginal(t):''}${t.type==='video'?'<span class="media-kind">▷ Video</span>':''}</div>`;
 }
 let creditHistory=[],historyFilter='All';
-function changeCredits(amount,label,kind,detail=''){state.credits+=amount;creditHistory.unshift({amount,label,kind,detail,balance:state.credits,time:new Date().toLocaleString('en-GB',{timeZone:'Asia/Shanghai',hour12:false})})}
+function changeCredits(amount,label,kind,detail='',account=state){account.credits+=amount;const history=account===state?creditHistory:account.history;history.unshift({amount,label,kind,detail,balance:account.credits,time:new Date().toLocaleString('en-GB',{timeZone:'Asia/Shanghai',hour12:false})})}
 function chargeGeneration(template){
   const label=template.type==='video'?'Video generation':'Image generation';
   changeCredits(-template.cost,label,'generation',template.name);
@@ -955,7 +984,72 @@ function verifyEmailCode(){
   login();
 }
 function login(){awaitingLogin=false;modal.oncancel=null;accountSignedIn=true;if(accountLoginMode){accountLoginMode=false;if(accountSnapshot){state.member=accountSnapshot.member;state.credits=accountSnapshot.credits;state.jobs=accountSnapshot.jobs;creditHistory=accountSnapshot.history;accountSnapshot=null}closeModal();update();if(window.afterWorksSignIn){window.afterWorksSignIn=false;works()}else update();return}activateMembership();const resume=window.resumeAfterPurchase;window.resumeAfterPurchase=false;continueAfterMembership(resume);}
-function generate(){if(busy)return;busy=true;const t=templates[current],result=document.getElementById('outcome').value;chargeGeneration(t);const job={t,status:'processing',result,originals:files.slice()};state.jobs.unshift(job);update();document.getElementById('generate').disabled=true;document.getElementById('status').textContent='';const overlay=document.createElement('div');overlay.id='generation-overlay';overlay.setAttribute('role','status');overlay.setAttribute('aria-live','polite');overlay.innerHTML='<div class="generation-message"><div class="glow-loader" aria-hidden="true"><span class="loader-orbit orbit-one"></span><span class="loader-orbit orbit-two"></span><span class="loader-core"><svg viewBox="0 0 42 42" fill="none"><path d="M29 12a13 13 0 1 0 4 16H22" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="m32 2 2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="currentColor"/></svg></span><i class="loader-spark spark-one">✧</i><i class="loader-spark spark-two">✦</i></div><p>Creating your glow</p><span class="loading-subtitle">A little magic is on its way</span><div class="loading-progress"><span></span></div></div>';document.body.appendChild(overlay);document.body.classList.add('is-generating');document.getElementById('app').setAttribute('inert','');document.querySelector('header').setAttribute('inert','');setTimeout(()=>{job.status=result==='ok'?'done':'failed';if(result==='network')changeCredits(t.cost,'Submission refund · '+t.name,'refund');busy=false;overlay.remove();document.body.classList.remove('is-generating');document.getElementById('app').removeAttribute('inert');document.querySelector('header').removeAttribute('inert');update();if(job.status==='done'){view(state.jobs.indexOf(job))}else{document.getElementById('generate').disabled=false;document.getElementById('status').textContent=result==='network'?'Could not submit. Your credits have been returned. Please try again.':'Generation failed. Credits were not returned. You can try again.'}},4200)}
+function releaseGenerationOverlay(overlay){
+  overlay.remove();
+  document.body.classList.remove('is-generating');
+  app.removeAttribute('inert');
+  document.querySelector('main>header').removeAttribute('inert');
+}
+
+function generationFailureMessage(job){
+  return job.result==='network'
+    ?'Could not submit. Your credits have been returned.'
+    :'Generation failed. Credits were not returned.';
+}
+
+function generate(){
+  if(busy)return;
+  busy=true;
+  const template=templates[current];
+  const result=document.getElementById('outcome').value;
+  chargeGeneration(template);
+  const job={t:template,status:'processing',result,originals:files.slice()};
+  state.jobs.unshift(job);
+  update();
+  document.getElementById('generate').disabled=true;
+  document.getElementById('status').textContent='';
+
+  const overlay=document.createElement('div');
+  overlay.id='generation-overlay';
+  overlay.innerHTML=`<div class="generation-message"><div class="glow-loader" aria-hidden="true"><span class="loader-orbit orbit-one"></span><span class="loader-orbit orbit-two"></span><span class="loader-core"><svg viewBox="0 0 42 42" fill="none"><path d="M29 12a13 13 0 1 0 4 16H22" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="m32 2 2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="currentColor"/></svg></span><i class="loader-spark spark-one">✧</i><i class="loader-spark spark-two">✦</i></div><p role="status">Creating your glow</p><span class="loading-subtitle">A little magic is on its way</span><div class="loading-progress"><span></span></div>
+    ${accountSignedIn?'<button type="button" class="generation-gallery">View my creations</button>':''}
+  </div>`;
+  document.body.appendChild(overlay);
+  document.body.classList.add('is-generating');
+  app.setAttribute('inert','');
+  document.querySelector('main>header').setAttribute('inert','');
+  overlay.querySelector('.generation-gallery')?.addEventListener('click',()=>{
+    releaseGenerationOverlay(overlay);
+    works();
+  });
+
+  setTimeout(()=>{
+    job.status=result==='ok'?'done':'failed';
+    const index=state.jobs.indexOf(job);
+    if(result==='network'){
+      const owner=index>=0?state:accountSnapshot;
+      if(owner?.jobs.includes(job)){
+        changeCredits(template.cost,'Submission refund · '+template.name,'refund','',owner);
+      }
+    }
+    busy=false;
+    update();
+
+    if(!overlay.isConnected){
+      const card=app.querySelector(`.works-grid [data-job-index="${index}"]`);
+      if(card)card.outerHTML=workCard(job,index);
+      return;
+    }
+
+    releaseGenerationOverlay(overlay);
+    if(job.status==='done'){
+      view(index);
+    }else{
+      document.getElementById('generate').disabled=false;
+      document.getElementById('status').textContent=generationFailureMessage(job)+' You can try again.';
+    }
+  },4200);
+}
 let accountSignedIn=false,accountLoginMode=false,accountSnapshot=null;
 function closeAccount(){document.getElementById('account-panel').hidden=true;document.getElementById('account-shade').hidden=true;document.querySelector('.creations-entry').setAttribute('aria-expanded','false')}
 document.addEventListener('keydown',event=>{if(event.key==='Escape')closeAccount()});
@@ -995,19 +1089,45 @@ function startAccountLogin(){
   accountLoginMode=true;
   emailLogin();
 }
-function works(){document.querySelector('main').scrollTop=0;activeNav('works');update();returnView=null;app.innerHTML=''+(!state.jobs.length?'<div class="empty-gallery"><div class="empty-images"><img src="'+photo(templates[1])+'" alt="Portrait inspiration"><img src="'+photo(templates[3])+'" alt="Portrait inspiration"></div><h2>Your story starts here.</h2><p>Your photos and videos will find<br>a home in this little gallery.</p><button onclick="browse()">Find your first look</button></div>':'<div class="works-grid">'+state.jobs.map((job,index)=>{
-  const video=job.t.type==='video';
+function works(){document.querySelector('main').scrollTop=0;activeNav('works');update();returnView=null;app.innerHTML=''+(!state.jobs.length?'<div class="empty-gallery"><div class="empty-images"><img src="'+photo(templates[1])+'" alt="Portrait inspiration"><img src="'+photo(templates[3])+'" alt="Portrait inspiration"></div><h2>Your story starts here.</h2><p>Your photos and videos will find<br>a home in this little gallery.</p><button onclick="browse()">Find your first look</button></div>':'<div class="works-grid">'+state.jobs.map(workCard).join('')+'</div>');update();setupTemplatePreviews();window.scrollTo(0,0)}
+
+function workCard(job,index){
   const cover=`<img src="${photo(job.t)}" alt="" loading="lazy">`;
-  const badge=video?'<span class="work-card-video">▶ Video</span>':'';
-  const status=job.status==='processing'?'Generating…':job.status==='failed'
-    ?(job.result==='network'?'Could not submit. Credits returned. Tap to retry.':'Generation failed. Credits were not returned. Tap to retry.')
-    :'';
-  const footer=`<span class="work-card-footer"><span class="work-card-title">${job.t.name}</span>${status?`<span class="work-card-status">${status}</span>`:''}</span>`;
-  const content=cover+badge+footer;
-  if(job.status==='processing')return `<div class="work-card">${content}</div>`;
-  const action=job.status==='done'?`view(${index},true)`:`openTemplate(${templates.indexOf(job.t)},this)`;
-  return `<button type="button" class="work-card" onclick="${action}">${content}</button>`;
-}).join('')+'</div>');update();setupTemplatePreviews();window.scrollTo(0,0)}
+  const badge=job.t.type==='video'?'<span class="work-card-video">▶ Video</span>':'';
+  const processing=job.status==='processing';
+  const failed=job.status==='failed';
+  const loading=processing?'<span class="work-loading-overlay" aria-hidden="true"><span class="work-spinner"></span></span>':'';
+  const status=processing?'Generating…':failed?'Generation failed':'';
+  const footer=`<span class="work-card-footer"><span class="work-card-title">${job.t.name}</span>
+    ${status?`<span class="work-card-status">${status}</span>`:''}</span>`;
+  const content=cover+loading+badge+footer;
+  if(processing)return `<div class="work-card is-processing" data-job-index="${index}" role="status">${content}</div>`;
+  const action=failed?`viewFailedCreation(${index})`:`view(${index},true)`;
+  return `<button type="button" class="work-card ${failed?'is-failed':''}" data-job-index="${index}" onclick="${action}">${content}</button>`;
+}
+
+function viewFailedCreation(index){
+  const job=state.jobs[index];
+  document.querySelector('main').scrollTop=0;
+  app.innerHTML=`<section class="result-page failed-creation">
+    <div class="result-top"><button class="back" type="button" onclick="works()" aria-label="Back to my creations">‹</button><span>${job.t.name}</span><span></span></div>
+    <div class="failed-creation-content">
+      <div class="failed-creation-icon" aria-hidden="true">!</div>
+      <h2>Generation failed</h2>
+      <p>${generationFailureMessage(job)}</p>
+    </div>
+    <div class="result-actions failed-creation-actions"><button class="wide" type="button" onclick="retryCreation(${index})">Try again</button></div>
+  </section>`;
+  update();
+  window.scrollTo(0,0);
+}
+
+function retryCreation(index){
+  const job=state.jobs[index];
+  current=templates.indexOf(job.t);
+  files=Array.from({length:job.t.people},(_,slot)=>job.originals?.[slot]||null);
+  renderMake();
+}
 let previewObserver=null,previewCleanups=[];
 function setupTemplatePreviews(){if(previewObserver)previewObserver.disconnect();previewCleanups.forEach(fn=>fn());previewCleanups=[];if(!('IntersectionObserver' in window))return;previewObserver=new IntersectionObserver(entries=>{entries.forEach(entry=>{const video=entry.target;
   if(video.classList.contains('template-comparison')){
