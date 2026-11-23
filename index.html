@@ -780,7 +780,50 @@ function closeModal(){
   modal.close();
 }
 function gate(){if(busy||!files.every(Boolean))return;if(!state.member){showPlans(true);return}if(state.credits<templates[current].cost){popup('<div class="modal-icon">✧</div><h2>A few more possibilities.</h2><p>Your membership is active.<br>Add credits to keep creating.</p><div class="plan"><div><b>100 credits</b><small>One-time credit pack</small></div><strong>$4.99</strong></div><button class="wide" onclick="changeCredits(100,&quot;Credit top-up&quot;,&quot;purchase&quot;);closeModal();update();gate()">Add 100 credits</button><p class="terms">Demo price. No payment will be taken.</p>');return}generate()}
-function paid(){accountLoginMode=false;modal.close();awaitingLogin=true;popup('<div class="activation-art" aria-hidden="true"><span class="activation-spark">✦</span><span class="activation-spark">✧</span><div class="activation-medallion"><span class="activation-crown"></span><span class="activation-check">✓</span></div></div><h2 id="activation-title">GlowUp Pro<br>activated!</h2><p>Sign in to link your membership and credits to your account.</p><button class="wide" onclick="emailLogin()">✉ Continue with email</button><p class="terms">Prototype only — no account is created.</p>','activation-modal');modal.setAttribute('aria-labelledby','activation-title');modal.oncancel=event=>{event.preventDefault();closeModal()}}
+function activateMembership(){
+  awaitingLogin=false;
+  if(state.member)return;
+  state.member=true;
+  changeCredits(60,'Membership credits','membership');
+}
+
+function continueAfterMembership(resume){
+  closeModal();
+  update();
+  if(window.afterWorksSignIn){
+    window.afterWorksSignIn=false;
+    works();
+  }else if(resume){
+    gate();
+  }else if(returnView){
+    const previous=returnView;
+    returnView=null;
+    openRecharge();
+    returnView=previous;
+  }
+}
+
+function paid(){
+  accountLoginMode=false;
+  modal.close();
+  awaitingLogin=!accountSignedIn;
+  const badge=`<div class="activation-art" aria-hidden="true"><span class="activation-spark">✦</span><span class="activation-spark">✧</span><div class="activation-medallion"><span class="activation-crown"></span><span class="activation-check">✓</span></div></div><h2 id="activation-title">GlowUp Pro<br>activated!</h2>`;
+  const message=accountSignedIn
+    ?'<p>Your membership and credits are ready.</p><button class="wide" id="activation-continue" type="button">Continue</button>'
+    :'<p>Sign in to link your membership and credits to your account.</p><button class="wide" onclick="emailLogin()">✉ Continue with email</button><p class="terms">Prototype only — no account is created.</p>';
+  popup(badge+message,'activation-modal');
+  modal.setAttribute('aria-labelledby','activation-title');
+  if(accountSignedIn){
+    const resume=window.resumeAfterPurchase;
+    window.resumeAfterPurchase=false;
+    modal.oncancel=null;
+    activateMembership();
+    update();
+    document.getElementById('activation-continue').onclick=()=>continueAfterMembership(resume);
+  }else{
+    modal.oncancel=event=>{event.preventDefault();closeModal()};
+  }
+}
 function loginNavigation(backAction=''){
   const back=backAction?`<button class="login-back" type="button" onclick="${backAction}" aria-label="Back">‹</button>`:'';
   return back+modalCloseButton.replace('closeModal()','cancelEmailLogin()');
@@ -857,7 +900,7 @@ function verifyEmailCode(){
   }
   login();
 }
-function login(){awaitingLogin=false;modal.oncancel=null;accountSignedIn=true;if(accountLoginMode){accountLoginMode=false;if(accountSnapshot){state.member=accountSnapshot.member;state.credits=accountSnapshot.credits;state.jobs=accountSnapshot.jobs;creditHistory=accountSnapshot.history;accountSnapshot=null}closeModal();update();if(window.afterWorksSignIn){window.afterWorksSignIn=false;works()}else update();return}state.member=true;changeCredits(60,'Membership credits','membership');closeModal();update();if(window.afterWorksSignIn){window.afterWorksSignIn=false;works()}else if(window.resumeAfterPurchase)gate();else if(returnView){const previous=returnView;returnView=null;openRecharge();returnView=previous}}
+function login(){awaitingLogin=false;modal.oncancel=null;accountSignedIn=true;if(accountLoginMode){accountLoginMode=false;if(accountSnapshot){state.member=accountSnapshot.member;state.credits=accountSnapshot.credits;state.jobs=accountSnapshot.jobs;creditHistory=accountSnapshot.history;accountSnapshot=null}closeModal();update();if(window.afterWorksSignIn){window.afterWorksSignIn=false;works()}else update();return}activateMembership();const resume=window.resumeAfterPurchase;window.resumeAfterPurchase=false;continueAfterMembership(resume);}
 function generate(){if(busy)return;busy=true;const t=templates[current],result=document.getElementById('outcome').value;chargeGeneration(t);const job={t,status:'processing',result,originals:files.slice()};state.jobs.unshift(job);update();document.getElementById('generate').disabled=true;document.getElementById('status').textContent='';const top=Math.max(0,document.querySelector('header').getBoundingClientRect().bottom);const overlay=document.createElement('div');overlay.id='generation-overlay';overlay.setAttribute('role','status');overlay.setAttribute('aria-live','polite');overlay.style.top=top+'px';overlay.innerHTML='<div class="generation-message"><div class="glow-loader" aria-hidden="true"><span class="loader-orbit orbit-one"></span><span class="loader-orbit orbit-two"></span><span class="loader-core"><svg viewBox="0 0 42 42" fill="none"><path d="M29 12a13 13 0 1 0 4 16H22" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="m32 2 2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="currentColor"/></svg></span><i class="loader-spark spark-one">✧</i><i class="loader-spark spark-two">✦</i></div><p>Creating your glow</p><span class="loading-subtitle">A little magic is on its way</span><div class="loading-progress"><span></span></div></div>';document.body.appendChild(overlay);document.body.classList.add('is-generating');document.getElementById('app').setAttribute('inert','');document.querySelector('header').setAttribute('inert','');setTimeout(()=>{job.status=result==='ok'?'done':'failed';if(result==='network')changeCredits(t.cost,'Submission refund · '+t.name,'refund');busy=false;overlay.remove();document.body.classList.remove('is-generating');document.getElementById('app').removeAttribute('inert');document.querySelector('header').removeAttribute('inert');update();if(job.status==='done'){view(state.jobs.indexOf(job))}else{document.getElementById('generate').disabled=false;document.getElementById('status').textContent=result==='network'?'Could not submit. Your credits have been returned. Please try again.':'Generation failed. Credits were not returned. You can try again.'}},4200)}
 let accountSignedIn=false,accountLoginMode=false,accountSnapshot=null;
 function closeAccount(){document.getElementById('account-panel').hidden=true;document.getElementById('account-shade').hidden=true;document.querySelector('.creations-entry').setAttribute('aria-expanded','false')}
