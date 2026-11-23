@@ -47,7 +47,7 @@ main:has(.studio-cta),main:has(.create-footer){padding-bottom:calc(130px + env(s
 
 
 
-.result-page{margin:0 -20px}.result-top{display:grid;grid-template-columns:34px 1fr 34px;align-items:center;gap:12px;padding:16px 20px}.result-top>span{text-align:center;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.result-stage{position:relative;width:100%;height:calc(100dvh - 245px);min-height:330px;background:#0d0c12;overflow:hidden}.result-generated{width:100%;height:100%;overflow:hidden}.result-generated>img{width:100%;height:100%;object-fit:contain;display:block}.original-images{display:flex;width:100%;height:100%;align-items:center;justify-content:center;gap:6px;padding:8px}.original-images>div{position:relative;width:100%;height:100%;min-width:0}.original-images.pair>div{width:50%}.original-images img{width:100%;height:100%;object-fit:contain;display:block}.original-images>div>span{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);padding:5px 10px;border-radius:20px;background:#0009;font-size:10px;color:#fff;white-space:nowrap}.result-mode-label{position:absolute;left:16px;top:16px;font-size:10px;padding:6px 11px;border-radius:20px;background:#14111c8c;backdrop-filter:blur(10px);color:#f3ecff}.compare-toggle{position:absolute;right:16px;bottom:16px;width:42px;height:42px;border-radius:11px;display:grid;place-items:center;padding:10px;background:#1b1627bb;color:#fff;backdrop-filter:blur(12px);border:1px solid #ffffff30}.compare-toggle svg{width:22px;height:22px}.compare-toggle.is-original{background:#c8b5ff;color:#211637}.result-actions{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,480px);z-index:10;display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#19161ff5;border-top:1px solid #ffffff12;padding:13px 16px calc(13px + env(safe-area-inset-bottom,0px));backdrop-filter:blur(18px)}.result-actions button{min-height:54px;border-radius:30px;font-size:15px;font-weight:500}.result-new{border:1px solid #c8b5ff;background:transparent;color:#e9ddff}.result-download{background:#c8b5ff;color:#211637;display:flex;align-items:center;justify-content:center;gap:8px}.result-download svg{width:20px;height:20px}main:has(.result-page){padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}@media(max-width:360px){.result-page{margin:0 -14px}.result-actions{padding-left:12px;padding-right:12px}.result-actions button{font-size:13px}}
+.result-page{margin:0 -20px}.result-top{display:grid;grid-template-columns:34px 1fr 34px;align-items:center;gap:12px;padding:16px 20px}.result-top>span{text-align:center;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.result-stage{position:relative;width:100%;height:calc(100dvh - 245px);min-height:330px;background:#0d0c12;overflow:hidden}.result-generated{width:100%;height:100%;overflow:hidden}.result-generated>img{width:100%;height:100%;object-fit:contain;display:block}.original-images{display:flex;width:100%;height:100%;align-items:center;justify-content:center;gap:6px;padding:8px}.original-images>div{position:relative;width:100%;height:100%;min-width:0}.original-images.pair>div{width:50%}.original-images img{width:100%;height:100%;object-fit:contain;display:block}.original-images>div>span{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);padding:5px 10px;border-radius:20px;background:#0009;font-size:10px;color:#fff;white-space:nowrap}.result-mode-label{position:absolute;left:16px;top:16px;font-size:10px;padding:6px 11px;border-radius:20px;background:#14111c8c;backdrop-filter:blur(10px);color:#f3ecff}.compare-toggle{position:absolute;right:16px;bottom:16px;width:42px;height:42px;border-radius:11px;display:grid;place-items:center;padding:10px;background:#1b1627bb;color:#fff;backdrop-filter:blur(12px);border:1px solid #ffffff30}.compare-toggle svg{width:22px;height:22px}.compare-toggle.is-original{background:#c8b5ff;color:#211637}.result-actions{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,480px);z-index:10;display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#19161ff5;border-top:1px solid #ffffff12;padding:13px 16px calc(13px + env(safe-area-inset-bottom,0px));backdrop-filter:blur(18px)}.result-actions button{min-height:54px;border-radius:30px;font-size:15px;font-weight:500}.result-new{border:1px solid #c8b5ff;background:transparent;color:#e9ddff}.result-download,.failed-creation-actions .wide{background:#c8b5ff;color:#211637;display:flex;align-items:center;justify-content:center;gap:8px}.result-download svg{width:20px;height:20px}main:has(.result-page){padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}@media(max-width:360px){.result-page{margin:0 -14px}.result-actions{padding-left:12px;padding-right:12px}.result-actions button{font-size:13px}}
 
 /* Image, gradient and selection outline share one clipping box. */
 .studio-template-photo{position:relative;aspect-ratio:3/4;padding:0;border:0;border-radius:12px;overflow:hidden;isolation:isolate}
@@ -600,10 +600,10 @@ dialog.activation-modal #activation-title + p{margin:0 auto 24px;max-width:275px
   margin-top:24px;padding:9px 15px;border:1px solid #ffffff27;
   border-radius:20px;background:transparent;color:#ded0f4;font-size:12px;
 }
-.work-loading-overlay{
-  position:absolute;inset:0;display:grid;place-items:center;
-  background:#100b19a6;
+.work-state-overlay{
+  position:absolute;inset:0;display:grid;place-content:center;place-items:center;gap:8px;
 }
+.work-loading-overlay{background:#100b19a6}
 .work-spinner{
   width:34px;height:34px;border:2px solid #e8d9ff45;border-top-color:#ead6ff;
   border-radius:50%;animation:glow-orbit-spin .9s linear infinite;
@@ -1119,11 +1119,11 @@ function workCard(job,index){
   const badge=job.t.type==='video'?'<span class="work-card-video">▶ Video</span>':'';
   const processing=job.status==='processing';
   const failed=job.status==='failed';
-  const loading=processing?'<span class="work-loading-overlay" aria-hidden="true"><span class="work-spinner"></span></span>':'';
-  const status=processing?'Generating…':failed?'Generation failed':'';
-  const footer=`<span class="work-card-footer"><span class="work-card-title">${job.t.name}</span>
-    ${status?`<span class="work-card-status">${status}</span>`:''}</span>`;
-  const content=cover+loading+badge+footer;
+  const overlay=processing
+    ?'<span class="work-state-overlay work-loading-overlay"><span class="work-spinner" aria-hidden="true"></span><span class="work-card-status">Generating…</span></span>'
+    :failed?'<span class="work-state-overlay"><span class="work-card-status">Failed</span></span>':'';
+  const footer=`<span class="work-card-footer"><span class="work-card-title">${job.t.name}</span></span>`;
+  const content=cover+overlay+badge+footer;
   if(processing)return `<div class="work-card is-processing" data-job-index="${index}" role="status">${content}</div>`;
   const action=failed?`viewFailedCreation(${index})`:`view(${index},true)`;
   return `<button type="button" class="work-card ${failed?'is-failed':''}" data-job-index="${index}" onclick="${action}">${content}</button>`;
@@ -1137,7 +1137,7 @@ function viewFailedCreation(index){
     <div class="failed-creation-content">
       <div class="failed-creation-icon" aria-hidden="true">!</div>
       <h2>Generation failed</h2>
-      <p>${generationFailureMessage(job)}</p>
+      <p>Please try again.</p>
     </div>
     <div class="result-actions failed-creation-actions"><button class="wide" type="button" onclick="retryCreation(${index})">Try again</button></div>
   </section>`;
