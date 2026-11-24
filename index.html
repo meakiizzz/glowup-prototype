@@ -677,7 +677,8 @@ dialog.generation-top-up::backdrop{background:#08070b99;backdrop-filter:blur(3px
   <button type="button" onclick="reviewCreation('done')">生成成功卡片</button>
   <button type="button" onclick="reviewCreation('failed')">生成失败卡片</button>
   <button type="button" onclick="reviewCreation('failed',true)">失败详情</button>
-</div></details><script>
+</div>
+<button type="button" onclick="reviewCreditTopUp()">积分不足抽屉</button></details><script>
 const templates=[{name:'Golden hour kiss',cat:'Couples',people:2,type:'video',cost:30,color:'#c98d83'},{name:'Editorial portrait',cat:'Portraits',people:1,type:'image',cost:10,color:'#8193ab'},{name:'Rainy night kiss',cat:'Couples',people:2,type:'video',cost:30,color:'#656a9b'},{name:'Summer postcard',cat:'Portraits',people:1,type:'image',cost:10,color:'#95b7aa'},{name:'City motion',cat:'Motion',people:1,type:'video',cost:20,color:'#9e829b'},{name:'Wedding moment',cat:'Couples',people:2,type:'image',cost:15,color:'#b0ac9c'}];
 const state={member:false,credits:0,jobs:[]};let current=0,files=[],busy=false,filter='All';const app=document.getElementById('app'),modal=document.getElementById('modal');
 const photos=['1516589178581-6cd7833ae3b2','1524504388940-b1c1722653e1','1511285560929-80b456fea0bc','1534528741775-53994a69daeb','1524250502761-1ac6f2e30d43','1522673607200-164d1b6ce486','1524250502761-1ac6f2e30d43','1517841905240-472988babdf9'];
@@ -1270,8 +1271,8 @@ function backFromResult(){if(resultFromWorks){works();return}const job=state.job
 function toggleResult(){resultOriginal=!resultOriginal;renderResult()}
 function renderResult(){const j=state.jobs[resultIndex];const originals=j.originals||[];app.innerHTML=`<section class="result-page"><div class="result-top"><button class="back" onclick="backFromResult()" aria-label="Back">‹</button><span>${j.t.name}</span><span></span></div><div class="result-stage ${resultOriginal?'original-view':''}">${resultOriginal?`<div class="original-images ${originals.length>1?'pair':''}">${originals.length?originals.map((src,k)=>`<div><img src="${src}" alt="Original photo ${k+1}">${originals.length>1?'<span>Person '+(k+1)+'</span>':''}</div>`).join(''):'<p>Original photo unavailable.</p>'}</div>`:`<div class="result-generated ${j.t.type==='video'?'moving':''}"><img src="${photo(j.t)}" alt="Generated result demo"></div>`}${resultOriginal?'<span class="result-mode-label">Original</span>':''}<button class="compare-toggle ${resultOriginal?'is-original':''}" onclick="toggleResult()" aria-label="${resultOriginal?'Show generated result':'Show original photos'}" aria-pressed="${resultOriginal}" title="Switch original / generated"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5M12 2v20"/></svg></button></div><div class="result-actions"><button class="result-new" onclick="browse()">Create more</button><button class="result-download" onclick="download(resultIndex)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m-5-5 5 5 5-5M4 18v3h16v-3" stroke-linecap="round" stroke-linejoin="round"/></svg>Download</button></div></section>`;update()}
 async function download(i){const j=state.jobs[i],video=j.t.type==='video';let blob;try{if(video){const image=await fetch(photo(j.t)).then(r=>r.blob());const data=await new Promise(resolve=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.readAsDataURL(image)});blob=new Blob(['<!doctype html><meta charset="utf-8"><title>GlowUp demo preview</title><style>body{background:#121217;color:white;text-align:center;font:16px system-ui}img{width:min(80vw,400px);animation:move 3s infinite alternate}@keyframes move{to{transform:scale(1.04)}}</style><p>Animated photo reference — not a generated video.</p><img src="'+data+'">'],{type:'text/html'})}else{blob=await fetch(photo(j.t)).then(r=>r.blob())}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='glowup-demo.'+(video?'html':'jpg');a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}catch(e){alert('Please open through a local web server to download. Photo previews still work when opened as a local file.')}}
-browse();
-if(new URLSearchParams(window.location.search).get('preview')==='credit-top-up'){
+function reviewCreditTopUp(){
+  if(busy)return;
   current=templates.findIndex(template=>template.type==='video'&&template.people===1);
   const template=templates[current];
   state.member=true;
@@ -1280,4 +1281,7 @@ if(new URLSearchParams(window.location.search).get('preview')==='credit-top-up')
   renderMake();
   gate();
 }
+
+browse();
+if(new URLSearchParams(window.location.search).get('preview')==='credit-top-up')reviewCreditTopUp();
 </script></body></html>
