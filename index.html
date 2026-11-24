@@ -263,7 +263,7 @@ dialog.immersive-paywall{position:fixed;inset:0;margin:0 auto;width:min(100%,480
 
 .credit-pack.pack-selected{border-color:#c8b5ff;background:#342944;box-shadow:inset 0 0 0 1px #c8b5ff}
 .recharge-footer{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,480px);padding:14px 20px calc(12px + env(safe-area-inset-bottom,0px));background:#17131ff5;backdrop-filter:blur(16px);border-top:1px solid #ffffff12;z-index:20}
-#recharge-submit{
+.recharge-submit{
   background:linear-gradient(180deg,#ffe6a0 0%,#ffcd62 54%,#efac35 100%);
   color:#382107;
   border:1px solid #e4a02c;
@@ -272,7 +272,7 @@ dialog.immersive-paywall{position:fixed;inset:0;margin:0 auto;width:min(100%,480
   border-radius:28px;
   min-height:54px;
 }
-#recharge-submit:focus-visible{outline-color:#ffe6a0}.recharge-footer .terms{margin:9px 0 0}
+.recharge-submit:focus-visible{outline-color:#ffe6a0}.recharge-footer .terms{margin:9px 0 0}
 main:has(.recharge-footer){padding-bottom:calc(140px + env(safe-area-inset-bottom,0px))}
 
 .immersive-hero{height:48dvh;min-height:250px;max-height:520px}
@@ -586,15 +586,33 @@ dialog.activation-modal #activation-title + p{margin:0 auto 24px;max-width:275px
 .login-profile-icon svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.6}
 .email-code-recipient{overflow-wrap:anywhere}
 
-.credit-pack{position:relative}
-.credit-pack:has(.pack-bonus-badge){padding-top:27px}
-.credit-pack .pack-number{display:flex;align-items:center;gap:7px}
-.pack-number .credit-coin{width:18px;height:19px;border-width:2px;border-radius:5px;font-size:11px}
+.credit-packs{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.credit-pack{
+  position:relative;display:flex;flex-direction:column;
+  justify-content:center;gap:3px;min-width:0;min-height:116px;padding:18px 7px 11px;
+  border-radius:13px;text-align:center;
+}
+.credit-pack .pack-number{display:flex;align-items:center;justify-content:center;gap:5px;line-height:1.15}
+.pack-number .credit-coin{width:16px;height:17px;border-width:2px;border-radius:5px;font-size:10px}
+.pack-price{font-size:14px;color:#eee6ff}
+.credit-pack small{margin:0;min-height:15px;font-size:10px}
 .credit-pack .pack-bonus{color:#d7c5ff;font-weight:700}
 .pack-bonus-badge{
-  position:absolute;top:0;right:0;padding:3px 8px;border-radius:0 11px 0 9px;
+  position:absolute;top:0;right:0;padding:3px 7px;border-radius:0 12px 0 9px;
   background:#6b53a6;color:#fff;font-size:10px;font-weight:750;line-height:1.3;
 }
+dialog.generation-top-up{padding:22px 16px 14px}
+.generation-top-up h2{font-size:24px;margin:6px 0 14px}
+.recharge-balance-summary{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:0 0 14px;
+  padding:9px 3px;border:1px solid #ffffff18;border-radius:11px;background:#19151f;
+}
+.recharge-balance-summary dt{font-size:10px;color:#bbaec8}
+.recharge-balance-summary dd{margin:0;font-size:16px;font-weight:700;color:#eee6ff}
+.recharge-balance-summary>div:last-child dd{color:#ffd486}
+.generation-top-up .credit-pack{min-height:102px}
+.generation-top-up .recharge-submit{margin-top:14px}
+.generation-top-up p.terms{margin:7px 0 0}
 
 .generation-gallery{
   margin-top:24px;padding:9px 15px;border:1px solid #ffffff27;
@@ -698,20 +716,69 @@ function update(){const primaryTabs=document.getElementById('primary-tabs');if(p
 const rechargePacks=[
   {n:100,bonus:0,price:'4.99'},
   {n:250,bonus:50,price:'9.99'},
-  {n:600,bonus:180,price:'19.99'}
+  {n:600,bonus:180,price:'19.99'},
+  {n:1200,bonus:600,price:'39.99'}
 ];
 let selectedRechargePack=0;
-function rechargeButtonLabel(pack){return 'Buy '+(pack.n+pack.bonus)+' credits · $'+pack.price}
-function selectRechargePack(index){selectedRechargePack=index;document.querySelectorAll('.credit-pack').forEach((button,i)=>{button.classList.toggle('pack-selected',i===index);button.setAttribute('aria-pressed',i===index?'true':'false')});document.getElementById('recharge-submit').textContent=rechargeButtonLabel(rechargePacks[index])}
-function openRecharge(){if(!state.member){showPlans(false);return}if(!returnView)returnView={html:app.innerHTML,scroll:window.scrollY};app.innerHTML=`<div class="page-top"><button class="back" aria-label="Back" onclick="backFromRecharge()">‹</button><span>Buy credits</span><button class="history-link" onclick="historyPage()">History</button></div><section class="recharge-heading"><span class="credit-coin">C</span><h1>More credits.<br>More possibilities.</h1><p>Your balance <b>✧ ${state.credits}</b></p></section><div class="credit-packs">${rechargePacks.map((p,i)=>`<button class="credit-pack ${i===selectedRechargePack?'pack-selected':''}" aria-pressed="${i===selectedRechargePack}" onclick="selectRechargePack(${i})"><span><span class="pack-number"><span class="credit-coin" aria-hidden="true">C</span> ${p.n}</span><small class="${p.bonus?'pack-bonus':''}">${p.bonus?'+'+p.bonus+' bonus credits':'credits'}</small></span><b>$${p.price}</b>${p.bonus?`<span class="pack-bonus-badge">${'+'+Math.round(p.bonus/p.n*100)}%</span>`:''}</button>`).join('')}</div><div class="recharge-footer"><button id="recharge-submit" class="wide" onclick="buyPack(selectedRechargePack)">${rechargeButtonLabel(rechargePacks[selectedRechargePack])}</button><p class="terms">One-time purchase · Demo only, no payment taken.</p></div>`;window.scrollTo(0,0);update()}
-function buyPack(index){
+
+function rechargeButtonLabel(pack){return 'Buy '+(pack.n+pack.bonus).toLocaleString('en-US')+' credits · $'+pack.price}
+
+function rechargePackOptions(selected,inDialog=false){
+  return `<div class="credit-packs" role="group" aria-label="Choose a credit pack">${rechargePacks.map((pack,index)=>
+    `<button type="button" class="credit-pack ${index===selected?'pack-selected':''}" aria-pressed="${index===selected}" onclick="selectRechargePack(${index},${inDialog})">
+      ${pack.bonus?`<span class="pack-bonus-badge">+${Math.round(pack.bonus/pack.n*100)}%</span>`:''}
+      <span class="pack-number">${pack.n.toLocaleString('en-US')} <span class="credit-coin" aria-hidden="true">C</span></span>
+      <span class="pack-price">$${pack.price}</span>
+      ${pack.bonus?`<small class="pack-bonus">+${pack.bonus.toLocaleString('en-US')} bonus credits</small>`:'<small>Credits</small>'}
+    </button>`
+  ).join('')}</div>`;
+}
+
+function rechargeSubmit(index,inDialog=false){
+  return `<button type="button" class="wide recharge-submit" onclick="buyPack(${index},${inDialog})">${rechargeButtonLabel(rechargePacks[index])}</button>`;
+}
+
+function selectRechargePack(index,inDialog=false){
+  if(!inDialog)selectedRechargePack=index;
+  const root=inDialog?modal:app;
+  root.querySelectorAll('.credit-pack').forEach((button,position)=>{
+    const selected=position===index;
+    button.classList.toggle('pack-selected',selected);
+    button.setAttribute('aria-pressed',String(selected));
+  });
+  const submit=root.querySelector('.recharge-submit');
+  submit.textContent=rechargeButtonLabel(rechargePacks[index]);
+  submit.onclick=()=>buyPack(index,inDialog);
+}
+
+function openRecharge(){if(!state.member){showPlans(false);return}if(!returnView)returnView={html:app.innerHTML,scroll:window.scrollY};app.innerHTML=`<div class="page-top"><button class="back" aria-label="Back" onclick="backFromRecharge()">‹</button><span>Buy credits</span><button class="history-link" onclick="historyPage()">History</button></div><section class="recharge-heading"><span class="credit-coin">C</span><h1>More credits.<br>More possibilities.</h1><p>Your balance <b>✧ ${state.credits}</b></p></section>${rechargePackOptions(selectedRechargePack)}<div class="recharge-footer">${rechargeSubmit(selectedRechargePack)}<p class="terms">One-time purchase · Demo only, no payment taken.</p></div>`;window.scrollTo(0,0);update()}
+
+function showGenerationTopUp(cost){
+  popup(`<h2>Not enough credits</h2>
+    <dl class="recharge-balance-summary">
+      <div><dt>Your balance</dt><dd>${state.credits}</dd></div>
+      <div><dt>Needed</dt><dd>${cost}</dd></div>
+      <div><dt>Short by</dt><dd>${cost-state.credits}</dd></div>
+    </dl>
+    ${rechargePackOptions(0,true)}
+    ${rechargeSubmit(0,true)}
+    <p class="terms">One-time purchase · Demo only, no payment taken.</p>`,
+    'generation-top-up');
+}
+
+function buyPack(index,resume=false){
   if(!state.member){showPlans(false);return}
   const pack=rechargePacks[index];
   changeCredits(pack.n,'Credit top-up','purchase');
   if(pack.bonus)changeCredits(pack.bonus,'Top-up bonus','bonus');
   update();
-  const breakdown=pack.bonus?`<p>${pack.n} purchased + ${pack.bonus} bonus credits</p>`:'';
-  popup(`<div class="modal-icon success">✓</div><h2>Credits added.</h2><p>${pack.n+pack.bonus} credits are now in your balance.</p>${breakdown}<button class="wide" onclick="closeModal();backFromRecharge()">Continue</button>`);
+  if(resume){
+    closeModal();
+    gate();
+    return;
+  }
+  const breakdown=pack.bonus?`<p>${pack.n.toLocaleString('en-US')} purchased + ${pack.bonus.toLocaleString('en-US')} bonus credits</p>`:'';
+  popup(`<div class="modal-icon success">✓</div><h2>Credits added.</h2><p>${(pack.n+pack.bonus).toLocaleString('en-US')} credits are now in your balance.</p>${breakdown}<button class="wide" onclick="closeModal();backFromRecharge()">Continue</button>`);
 }
 function backFromRecharge(){if(!returnView){browse();return}const v=returnView;returnView=null;app.innerHTML=v.html;files.forEach((f,i)=>{const image=document.getElementById('thumb'+i);if(image&&f){image.src=f;image.hidden=false}});update();window.scrollTo(0,v.scroll)}
 function activeNav(page){const tabs=document.getElementById('primary-tabs');tabs.hidden=false;tabs.querySelectorAll('button').forEach(b=>{const selected=b.dataset.page===(page==='works'?'works':'home');b.classList.toggle('selected',selected);b.setAttribute('aria-current',selected?'page':'false')})}
@@ -873,7 +940,13 @@ function closeModal(){
   }
   modal.close();
 }
-function gate(){if(busy||!files.every(Boolean))return;if(!state.member){showPlans(true);return}if(state.credits<templates[current].cost){popup('<div class="modal-icon">✧</div><h2>A few more possibilities.</h2><p>Your membership is active.<br>Add credits to keep creating.</p><div class="plan"><div><b>100 credits</b><small>One-time credit pack</small></div><strong>$4.99</strong></div><button class="wide" onclick="changeCredits(100,&quot;Credit top-up&quot;,&quot;purchase&quot;);closeModal();update();gate()">Add 100 credits</button><p class="terms">Demo price. No payment will be taken.</p>');return}generate()}
+function gate(){
+  if(busy||!files.every(Boolean))return;
+  if(!state.member){showPlans(true);return}
+  const cost=templates[current].cost;
+  if(state.credits<cost){showGenerationTopUp(cost);return}
+  generate();
+}
 function activateMembership(){
   awaitingLogin=false;
   if(state.member)return;
