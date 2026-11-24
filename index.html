@@ -638,14 +638,9 @@ dialog.generation-top-up::backdrop{background:#08070b99;backdrop-filter:blur(3px
 .generation-top-up .recharge-submit{margin-top:14px}
 .generation-top-up p.terms{margin:7px 0 0}
 
-.generation-actions{display:flex;flex-direction:column;align-items:center;gap:9px;margin-top:24px}
 .generation-explore{
-  min-height:42px;padding:9px 23px;border-radius:24px;
+  min-height:42px;margin-top:24px;padding:9px 23px;border-radius:24px;
   background:#c8b5ff;color:#211637;font-size:14px;font-weight:700;
-}
-.generation-gallery{
-  padding:9px 15px;border:1px solid #ffffff27;
-  border-radius:20px;background:transparent;color:#ded0f4;font-size:12px;
 }
 .work-state-overlay{
   position:absolute;inset:0;display:grid;place-content:center;place-items:center;gap:8px;
@@ -1112,14 +1107,11 @@ function generationFailureMessage(job){
     :'Generation failed. Credits were not returned.';
 }
 
-function showGenerationOverlay(showGallery=accountSignedIn){
+function showGenerationOverlay(){
   const overlay=document.createElement('div');
   overlay.id='generation-overlay';
   overlay.innerHTML=`<div class="generation-message"><div class="glow-loader" aria-hidden="true"><span class="loader-orbit orbit-one"></span><span class="loader-orbit orbit-two"></span><span class="loader-core"><svg viewBox="0 0 42 42" fill="none"><path d="M29 12a13 13 0 1 0 4 16H22" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="m32 2 2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="currentColor"/></svg></span><i class="loader-spark spark-one">✧</i><i class="loader-spark spark-two">✦</i></div><p role="status">Creating your glow</p><span class="loading-subtitle">A little magic is on its way</span><div class="loading-progress"><span></span></div>
-    <div class="generation-actions">
-      <button type="button" class="generation-explore">Explore More</button>
-      ${showGallery?'<button type="button" class="generation-gallery">View my creations</button>':''}
-    </div>
+    <button type="button" class="generation-explore">Explore More</button>
   </div>`;
   document.body.appendChild(overlay);
   document.body.classList.add('is-generating');
@@ -1130,10 +1122,6 @@ function showGenerationOverlay(showGallery=accountSignedIn){
     filter='All';
     mediaFilter='all';
     browse();
-  });
-  overlay.querySelector('.generation-gallery')?.addEventListener('click',()=>{
-    releaseGenerationOverlay(overlay);
-    works();
   });
   return overlay;
 }
@@ -1306,6 +1294,6 @@ const preview=new URLSearchParams(window.location.search).get('preview');
 if(preview==='credit-top-up')reviewCreditTopUp();
 if(preview==='generation-loading'){
   reviewCreation('processing');
-  showGenerationOverlay(true);
+  showGenerationOverlay();
 }
 </script></body></html>
