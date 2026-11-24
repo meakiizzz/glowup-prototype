@@ -1112,24 +1112,13 @@ function generationFailureMessage(job){
     :'Generation failed. Credits were not returned.';
 }
 
-function generate(){
-  if(busy)return;
-  busy=true;
-  const template=templates[current];
-  const result=document.getElementById('outcome').value;
-  chargeGeneration(template);
-  const job={t:template,status:'processing',result,originals:files.slice()};
-  state.jobs.unshift(job);
-  update();
-  document.getElementById('generate').disabled=true;
-  document.getElementById('status').textContent='';
-
+function showGenerationOverlay(showGallery=accountSignedIn){
   const overlay=document.createElement('div');
   overlay.id='generation-overlay';
   overlay.innerHTML=`<div class="generation-message"><div class="glow-loader" aria-hidden="true"><span class="loader-orbit orbit-one"></span><span class="loader-orbit orbit-two"></span><span class="loader-core"><svg viewBox="0 0 42 42" fill="none"><path d="M29 12a13 13 0 1 0 4 16H22" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="m32 2 2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="currentColor"/></svg></span><i class="loader-spark spark-one">✧</i><i class="loader-spark spark-two">✦</i></div><p role="status">Creating your glow</p><span class="loading-subtitle">A little magic is on its way</span><div class="loading-progress"><span></span></div>
     <div class="generation-actions">
       <button type="button" class="generation-explore">Explore More</button>
-      ${accountSignedIn?'<button type="button" class="generation-gallery">View my creations</button>':''}
+      ${showGallery?'<button type="button" class="generation-gallery">View my creations</button>':''}
     </div>
   </div>`;
   document.body.appendChild(overlay);
@@ -1146,6 +1135,22 @@ function generate(){
     releaseGenerationOverlay(overlay);
     works();
   });
+  return overlay;
+}
+
+function generate(){
+  if(busy)return;
+  busy=true;
+  const template=templates[current];
+  const result=document.getElementById('outcome').value;
+  chargeGeneration(template);
+  const job={t:template,status:'processing',result,originals:files.slice()};
+  state.jobs.unshift(job);
+  update();
+  document.getElementById('generate').disabled=true;
+  document.getElementById('status').textContent='';
+
+  const overlay=showGenerationOverlay();
 
   setTimeout(()=>{
     job.status=result==='ok'?'done':'failed';
@@ -1297,5 +1302,10 @@ function reviewCreditTopUp(){
 }
 
 browse();
-if(new URLSearchParams(window.location.search).get('preview')==='credit-top-up')reviewCreditTopUp();
+const preview=new URLSearchParams(window.location.search).get('preview');
+if(preview==='credit-top-up')reviewCreditTopUp();
+if(preview==='generation-loading'){
+  reviewCreation('processing');
+  showGenerationOverlay(true);
+}
 </script></body></html>
