@@ -685,7 +685,7 @@ dialog.generation-top-up::backdrop{background:#08070b99;backdrop-filter:blur(3px
   display:flex;align-items:center;gap:9px;flex:1;min-width:0;
   padding:0;background:none;color:inherit;text-align:left;border-radius:11px;
 }
-.creation-ready-open:focus-visible,.creation-ready-dismiss:focus-visible{outline-color:#65518d}
+.creation-ready-open:focus-visible{outline-color:#65518d}
 .creation-ready-art{position:relative;width:39px;height:39px;flex:none}
 .creation-ready-art img{display:block;width:100%;height:100%;object-fit:cover;border-radius:9px}
 .creation-ready-art span{
@@ -698,19 +698,22 @@ dialog.generation-top-up::backdrop{background:#08070b99;backdrop-filter:blur(3px
   flex:none;padding:6px 10px;border-radius:14px;background:#63438d;color:white;
   font-size:11px;font-weight:700;
 }
-.creation-ready-dismiss{
-  align-self:flex-start;width:22px;height:22px;padding:0;
-  background:none;color:#574768;font-size:17px;line-height:1;
-}
 @media(min-width:600px){
   #creation-ready{top:32px;width:calc(var(--phone-w) - 16px)}
 }
 @media(prefers-reduced-motion:no-preference){
   #creation-ready{animation:creation-ready-enter 240ms ease-out both}
+  #creation-ready.is-dismissing{
+    pointer-events:none;animation:creation-ready-exit 220ms ease-in both;
+  }
 }
 @keyframes creation-ready-enter{
   from{translate:0 -12px;opacity:0}
   to{translate:0 0;opacity:1}
+}
+@keyframes creation-ready-exit{
+  from{translate:0 0;opacity:1}
+  to{translate:0 -18px;opacity:0}
 }
 </style></head><body><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><clipPath id="entry-cutout" clipPathUnits="objectBoundingBox"><path d="M.32 0H1V1H0V.43Q0 .28 .12 .28H.14Q.24 .28 .24 .15Q.24 0 .32 0Z"/></clipPath></defs></svg><main><header><button class="brand-home" onclick="browse()" aria-label="GlowUp home"><svg viewBox="0 0 42 42" fill="none" aria-hidden="true"><path d="M29 12a13 13 0 1 0 4 16H22" stroke="#C8B5FF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="m32 1 2.2 6.8L41 10l-6.8 2.2L32 19l-2.2-6.8L23 10l6.8-2.2z" fill="#F3E9FF"/></svg><b>GlowUp</b></button><div class="header-actions"><button id="balance">✧ Get Pro</button><button class="creations-entry signin-entry" onclick="startAccountLogin()" aria-label="Sign in" title="Sign in"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2" stroke-linecap="round"/></svg><span class="signin-label">Sign in</span></button></div></header><div id="app"></div></main><div id="account-shade" hidden onclick="closeAccount()"></div><aside id="account-panel" hidden aria-label="Account menu"></aside><nav id="primary-tabs" aria-label="Main navigation" hidden><button data-page="home" onclick="browse()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3zM9 20v-7h6v7"/></svg><span>Home</span></button><button data-page="works" onclick="openWorksTab()"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 5V3h10v2M3 16l5-5 4 4 3-3 6 6"/></svg><span>My creations</span></button></nav><dialog id="template-detail" aria-labelledby="template-detail-title"></dialog><dialog id="modal"></dialog><details><summary>评审模式 · 原型说明与场景切换</summary><p>照片为风格参考，不代表真实生成结果。支付、登录与任务均为模拟。视频仅为动态照片预览。刷新会清空状态。</p><label>任务结果 <select id="outcome"><option value="ok">成功</option><option value="network">网络未提交 · 退积分</option><option value="failed">已接收后失败 · 不退积分</option></select></label><p><button onclick="state.member=true;state.credits=0;update()">会员 / 0 积分</button><button onclick="state.member=true;state.credits=100;update()">会员 / 100 积分</button><button onclick="location.reload()">重置</button></p><div class="review-creation-links" role="group" aria-label="作品状态预览">
   <button type="button" onclick="reviewCreation('processing')">生成中卡片</button>
@@ -1268,8 +1271,7 @@ function showCreationReady(job){
       </span>
       <span class="creation-ready-text" role="status">Your <strong></strong> is ready!</span>
       <span class="creation-ready-action">View</span>
-    </button>
-    <button class="creation-ready-dismiss" type="button" aria-label="Dismiss notification">×</button>`;
+    </button>`;
   notice.querySelector('strong').textContent=job.t.name;
   notice.querySelector('.creation-ready-open').addEventListener('click',()=>{
     const index=state.jobs.indexOf(job);
@@ -1278,8 +1280,16 @@ function showCreationReady(job){
     closeAccount();
     view(index,true);
   });
-  notice.querySelector('.creation-ready-dismiss').addEventListener('click',dismissCreationReady);
   document.body.appendChild(notice);
+  setTimeout(()=>{
+    if(!notice.isConnected)return;
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches){
+      notice.remove();
+      return;
+    }
+    notice.classList.add('is-dismissing');
+    setTimeout(()=>notice.remove(),240);
+  },5000);
 }
 
 function reviewCreationReady(){
