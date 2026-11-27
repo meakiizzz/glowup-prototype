@@ -720,7 +720,7 @@ dialog.generation-top-up::backdrop{background:#08070b99;backdrop-filter:blur(3px
   position:fixed;z-index:70;left:50%;
   bottom:calc(80px + env(safe-area-inset-bottom,0px));
   width:max-content;max-width:min(calc(100% - 32px),400px);
-  transform:translateX(-50%);padding:11px 16px;border-radius:14px;
+  transform:translateX(-50%);padding:7px 12px;border-radius:12px;
   border:1px solid #ffffff24;background:#30273d;color:#fff;
   box-shadow:0 8px 24px #0c081766;font-size:13px;line-height:1.45;
   text-align:center;pointer-events:none;
@@ -1275,7 +1275,7 @@ function showOfflineToast(){
   toast.id='offline-toast';
   toast.setAttribute('role','status');
   document.body.appendChild(toast);
-  toast.textContent="You're offline. Check your connection and try again.";
+  toast.textContent="You’re offline";
   setTimeout(()=>toast.remove(),4500);
 }
 
