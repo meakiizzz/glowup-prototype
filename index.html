@@ -715,12 +715,26 @@ dialog.generation-top-up::backdrop{background:#08070b99;backdrop-filter:blur(3px
   from{translate:0 0;opacity:1}
   to{translate:0 -18px;opacity:0}
 }
+
+#offline-toast{
+  position:fixed;z-index:70;left:50%;
+  bottom:calc(80px + env(safe-area-inset-bottom,0px));
+  width:max-content;max-width:min(calc(100% - 32px),400px);
+  transform:translateX(-50%);padding:11px 16px;border-radius:14px;
+  border:1px solid #ffffff24;background:#30273d;color:#fff;
+  box-shadow:0 8px 24px #0c081766;font-size:13px;line-height:1.45;
+  text-align:center;pointer-events:none;
+}
+@media(min-width:600px){
+  #offline-toast{bottom:calc(var(--phone-bottom) + 72px);max-width:calc(var(--phone-w) - 32px)}
+}
 </style></head><body><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><clipPath id="entry-cutout" clipPathUnits="objectBoundingBox"><path d="M.32 0H1V1H0V.43Q0 .28 .12 .28H.14Q.24 .28 .24 .15Q.24 0 .32 0Z"/></clipPath></defs></svg><main><header><button class="brand-home" onclick="browse()" aria-label="GlowUp home"><svg viewBox="0 0 42 42" fill="none" aria-hidden="true"><path d="M29 12a13 13 0 1 0 4 16H22" stroke="#C8B5FF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="m32 1 2.2 6.8L41 10l-6.8 2.2L32 19l-2.2-6.8L23 10l6.8-2.2z" fill="#F3E9FF"/></svg><b>GlowUp</b></button><div class="header-actions"><button id="balance">✧ Get Pro</button><button class="creations-entry signin-entry" onclick="startAccountLogin()" aria-label="Sign in" title="Sign in"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2" stroke-linecap="round"/></svg><span class="signin-label">Sign in</span></button></div></header><div id="app"></div></main><div id="account-shade" hidden onclick="closeAccount()"></div><aside id="account-panel" hidden aria-label="Account menu"></aside><nav id="primary-tabs" aria-label="Main navigation" hidden><button data-page="home" onclick="browse()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3zM9 20v-7h6v7"/></svg><span>Home</span></button><button data-page="works" onclick="openWorksTab()"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 5V3h10v2M3 16l5-5 4 4 3-3 6 6"/></svg><span>My creations</span></button></nav><dialog id="template-detail" aria-labelledby="template-detail-title"></dialog><dialog id="modal"></dialog><details><summary>评审模式 · 原型说明与场景切换</summary><p>照片为风格参考，不代表真实生成结果。支付、登录与任务均为模拟。视频仅为动态照片预览。刷新会清空状态。</p><label>任务结果 <select id="outcome"><option value="ok">成功</option><option value="network">网络未提交 · 退积分</option><option value="failed">已接收后失败 · 不退积分</option></select></label><p><button onclick="state.member=true;state.credits=0;update()">会员 / 0 积分</button><button onclick="state.member=true;state.credits=100;update()">会员 / 100 积分</button><button onclick="location.reload()">重置</button></p><div class="review-creation-links" role="group" aria-label="作品状态预览">
   <button type="button" onclick="reviewCreation('processing')">生成中卡片</button>
   <button type="button" onclick="reviewCreation('done')">生成成功卡片</button>
   <button type="button" onclick="reviewCreation('failed')">生成失败卡片</button>
   <button type="button" onclick="reviewCreation('failed',true)">失败详情</button>
   <button type="button" onclick="reviewCreationReady()">生成成功通知</button>
+  <button type="button" onclick="showOfflineToast()">断网 Toast</button>
 </div>
 <button type="button" onclick="reviewCreditTopUp()">积分不足抽屉</button></details><script>
 const templates=[{name:'Golden hour kiss',cat:'Couples',people:2,type:'video',cost:30,color:'#c98d83'},{name:'Editorial portrait',cat:'Portraits',people:1,type:'image',cost:10,color:'#8193ab'},{name:'Rainy night kiss',cat:'Couples',people:2,type:'video',cost:30,color:'#656a9b'},{name:'Summer postcard',cat:'Portraits',people:1,type:'image',cost:10,color:'#95b7aa'},{name:'City motion',cat:'Motion',people:1,type:'video',cost:20,color:'#9e829b'},{name:'Wedding moment',cat:'Couples',people:2,type:'image',cost:15,color:'#b0ac9c'}];
@@ -1012,6 +1026,7 @@ function closeModal(){
 }
 function gate(){
   if(busy||!files.every(Boolean))return;
+  if(navigator.onLine===false){showOfflineToast();return}
   if(!state.member){showPlans(true);return}
   const cost=templates[current].cost;
   if(state.credits<cost){showGenerationTopUp(cost);return}
@@ -1253,6 +1268,19 @@ function startAccountLogin(){
   emailLogin();
 }
 function works(){document.querySelector('main').scrollTop=0;activeNav('works');update();returnView=null;app.innerHTML=''+(!state.jobs.length?'<div class="empty-gallery"><div class="empty-images"><img src="'+photo(templates[1])+'" alt="Portrait inspiration"><img src="'+photo(templates[3])+'" alt="Portrait inspiration"></div><h2>Your story starts here.</h2><p>Your photos and videos will find<br>a home in this little gallery.</p><button onclick="browse()">Find your first look</button></div>':'<div class="works-grid">'+state.jobs.map(workCard).join('')+'</div>');update();setupTemplatePreviews();window.scrollTo(0,0)}
+
+function showOfflineToast(){
+  document.getElementById('offline-toast')?.remove();
+  const toast=document.createElement('div');
+  toast.id='offline-toast';
+  toast.setAttribute('role','status');
+  document.body.appendChild(toast);
+  toast.textContent="You're offline. Check your connection and try again.";
+  setTimeout(()=>toast.remove(),4500);
+}
+
+window.addEventListener('offline',showOfflineToast);
+window.addEventListener('online',()=>document.getElementById('offline-toast')?.remove());
 
 function dismissCreationReady(){
   document.getElementById('creation-ready')?.remove();
